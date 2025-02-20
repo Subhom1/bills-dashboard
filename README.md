@@ -23,10 +23,12 @@ Users can filter bills, view details in English and Irish, and mark bills as fav
 ### Steps to Run the Project
 
 1. **Clone the Repository**
+
    ```sh
    git clone https://github.com/Subhom1/bills-dashboard.git
    cd bills-dashboard
 
 2. **Install the Dependencies**
+
    ```sh
    npm install 
