@@ -17,7 +17,7 @@ Users can filter bills, view details in English and Irish, and mark bills as fav
 ## Installation & Setup
 
 ### Prerequisites
-- Node.js (v18+ recommended)
+- Node.js (22.0) required
 - npm
 
 ### Steps to Run the Project
