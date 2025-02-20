@@ -28,4 +28,5 @@ Users can filter bills, view details in English and Irish, and mark bills as fav
    cd bills-dashboard
 
 2. **Install the Dependencies**
+   ```sh
    npm install 
