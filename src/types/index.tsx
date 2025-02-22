@@ -23,6 +23,7 @@ export type Bill = {
   sponsors: Sponsor[];
   stages: Stage[];
   status: string;
+  isFavorite?: boolean;
 };
 
 export type AmendmentList = {
@@ -135,4 +136,15 @@ export type House = {
 
 export type URI = {
   uri: string;
+};
+export type BillsResponseHead = {
+  counts: {
+    billCount: number; 
+    resultCount: number; 
+  };
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  lang: string; 
 };

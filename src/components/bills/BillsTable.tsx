@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import Paper from "@mui/material/Paper";
 import { Bill } from "../../types/index";
 import Table from "@mui/material/Table";
@@ -6,6 +7,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TablePagination from "@mui/material/TablePagination";
 
 /**
  * Props interface for the BillsTable component
@@ -14,6 +16,8 @@ import TableRow from "@mui/material/TableRow";
  */
 interface BillsTableProps {
   bills: Bill[];
+  onLoadMore?: (skip: number) => Promise<void>;
+  isLoading?: boolean;
 }
 
 /**
@@ -22,14 +26,43 @@ interface BillsTableProps {
  * @param {BillsTableProps} props - Component props
  * @returns {JSX.Element} Rendered table component
  */
-export const BillsTable = ({ bills }: BillsTableProps) => {
+export const BillsTable = ({ bills, onLoadMore, isLoading }: BillsTableProps) => {
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 10; // Fixed number of rows per page
+
+  // Calculate the bills to display on the current page
+  const displayedBills = bills.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+  // Handle page change event
+  const handleChangePage = async (event: unknown, newPage: number) => {
+    if (isLoading) return; // Prevent multiple calls while loading
+    setPage(newPage);
+
+    // Only fetch more data when moving forward and onLoadMore is provided
+    if (newPage > page && onLoadMore) {
+      const newSkip = newPage * rowsPerPage;
+      await onLoadMore(newSkip);
+    }
+  };
   return (
     <Paper
-      sx={{ width: "100%", overflow: "hidden" }}
+      sx={{
+        width: "100%",
+        height: "calc(650px - 70px)", // 650px is tab panel height, 70px is tabs height
+        display: "flex",
+        flexDirection: "column",
+      }}
       data-testid="bills-table-paper"
     >
       {/* Container with max height to enable scrolling */}
-      <TableContainer sx={{ maxHeight: "calc(100vh - 100px)" }}>
+      <TableContainer
+        sx={{
+          height: "calc(100% - 52px)", // Full height minus pagination height
+          overflow: "auto",
+        }}
+      >
         <Table
           stickyHeader
           sx={{
@@ -64,10 +97,37 @@ export const BillsTable = ({ bills }: BillsTableProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {/* Table body content will be populated with bill data */}
+            {displayedBills.map((bill) => (
+              <TableRow
+                key={bill.uri}
+                sx={{
+                  "&:last-child td, &:last-child th": { border: 0 },
+                }}
+              >
+                <TableCell component="th" scope="row">
+                  {bill.billNo}
+                </TableCell>
+                <TableCell>{bill.billType}</TableCell>
+                <TableCell>{bill.status}</TableCell>
+                <TableCell>
+                  {bill.sponsors[0]?.sponsor.as.showAs || "No sponsor"}
+                </TableCell>
+                <TableCell align="center"></TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+      <TablePagination
+        component="div"
+        count={-1} //  -1 to enable infinite scrolling
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPageOptions={[]}
+        labelRowsPerPage={""}
+        disabled={isLoading}
+      />
     </Paper>
   );
 };

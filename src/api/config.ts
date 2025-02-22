@@ -30,7 +30,7 @@ export const API_CONFIG = {
       date_end: "2099-01-01",    // Future bills up to 2099
 
       // Pagination settings
-      limit: "5",    // Number of results per page
+      limit: "1",    // Number of results per page
       skip: "0",     // Number of results to skip (for pagination)
 
       // Optional chamber filter
