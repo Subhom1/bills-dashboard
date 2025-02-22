@@ -7,32 +7,48 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
+/**
+ * Props interface for the BillsTable component
+ * @interface BillsTableProps
+ * @property {Bill[]} bills - Array of bill objects to display in the table
+ */
 interface BillsTableProps {
   bills: Bill[];
 }
 
+/**
+ * BillsTable Component
+ * Displays a responsive table of bills with pagination and favorite functionality
+ * @param {BillsTableProps} props - Component props
+ * @returns {JSX.Element} Rendered table component
+ */
 export const BillsTable = ({ bills }: BillsTableProps) => {
-  
   return (
-    <Paper sx={{ width: "100%", overflow: "hidden"}}>
-      <TableContainer sx={{ maxHeight: "calc(100vh - 100px)", }}>
+    <Paper
+      sx={{ width: "100%", overflow: "hidden" }}
+      data-testid="bills-table-paper"
+    >
+      {/* Container with max height to enable scrolling */}
+      <TableContainer sx={{ maxHeight: "calc(100vh - 100px)" }}>
         <Table
           stickyHeader
           sx={{
             minWidth: 650,
+            // Responsive cell styling for different screen sizes
             "& .MuiTableCell-root": {
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
               maxWidth: {
-                xs: "100px", // mobile
-                sm: "150px", // tablet
-                md: "200px", // desktop
+                xs: "100px", // Mobile view
+                sm: "150px", // Tablet view
+                md: "200px", // Desktop view
               },
             },
           }}
           aria-label="bills table"
         >
+          {/* Table header with fixed column names */}
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: "bold" }}>Bill Number</TableCell>
@@ -48,7 +64,7 @@ export const BillsTable = ({ bills }: BillsTableProps) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            
+            {/* Table body content will be populated with bill data */}
           </TableBody>
         </Table>
       </TableContainer>
