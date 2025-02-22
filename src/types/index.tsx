@@ -22,6 +22,7 @@ export type Bill = {
   sourceURI: string;
   sponsors: Sponsor[];
   stages: Stage[];
+  status: string;
 };
 
 export type AmendmentList = {

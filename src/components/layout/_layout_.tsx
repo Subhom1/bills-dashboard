@@ -1,12 +1,10 @@
-import { mockBills } from "@/tests/mocks/mockBills";
-import { BillsTable } from "@/components/bills/BillsTable";
-
+import TabPanel from "@/components/bills/TabPanel";
 
 export const Layout = () => {
   return (
     <>
-      <header>Bills Dashboard</header>
-      <BillsTable bills={mockBills[0].results.map((item) => item.bill)} />
+      <header className="text-left my-5 ml-5 font-semibold text-3xl">Bills Dashboard</header>
+      <TabPanel />
     </>
   );
 };
