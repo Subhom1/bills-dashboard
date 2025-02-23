@@ -1,22 +1,15 @@
-import React, {useState, useEffect, useCallback, useRef} from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { billsState } from "@/state/atoms/billsState";
 import { billHeadState } from "@/state/atoms/billHeadState";
 import { fetchBills } from "@/api/bills";
-import { useRecoilState, useRecoilValue } from "recoil";
-import {
-  favoriteBillsSelector,
-  billTypesSelector,
-} from "@/state/selectors/billsSelector";
-import {TabContent} from './TabContent';
-import {CustomTabPanel} from './CustomTabPanel';
-
-
-
-
-
+import { useRecoilState } from "recoil";
+import { TabContent } from "./TabContent";
+import { CustomTabPanel } from "./CustomTabPanel";
+import { BillFilterSelect } from "./BillFilterSelect";
+import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 /**
  * Helper function to generate accessibility props for tabs
  * @param {number} index - Index of the tab
@@ -36,24 +29,34 @@ function a11yProps(index: number) {
  * @returns {JSX.Element} Rendered tabs container with content
  */
 export default function TabPanel() {
-  // State to track the currently selected tab
-  const [value, setValue] = useState(0);
-  // State to store the list of bills
-  const [bills, setBills] = useRecoilState(billsState);
-  const [billHead, setBillHead] = useRecoilState(billHeadState);
-  const [isLoading, setIsLoading] = useState(false);
-  const [skip, setSkip] = useState(0);
-  const favoriteBills = useRecoilValue(favoriteBillsSelector);
-  const billTypes = useRecoilValue(billTypesSelector);
+  const [value, setValue] = useState<number>(0);
+  const [bills, setBills] = useRecoilState<Bill[]>(billsState);
+  const [billHead, setBillHead] =
+    useRecoilState<BillsResponseHead>(billHeadState);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [skip, setSkip] = useState<number>(0);
+  const [favoriteBills, setFavoriteBills] =
+    useRecoilState<Bill[]>(favoriteBillsState);
+  const [activeFilter, setActiveFilter] = useState<string>("");
+  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   // Use useRef to track if initial fetch has been made
-  const initialFetchRef = useRef(false);
+  const initialFetchRef = useRef<boolean>(false);
+  // Handler for filter changes
+  const handleFilterChange = useCallback(
+    (filteredBills: Bill[], type: string): void => {
+      setFilteredBills(filteredBills);
+      setActiveFilter(type);
+    },
+    []
+  );
+
   // Fetch bills from the API on initial render
   useEffect(() => {
-    const loadBills = async () => {
+    const loadBills = async (): Promise<void> => {
       if (initialFetchRef.current) return; // Skip if already fetched
       initialFetchRef.current = true;
       try {
-        const response = await fetchBills(false, 25, 0);
+        const response = await fetchBills(true, 25, 0);
         setBillHead(response.head);
         // Add isFavorite flag to each bill before saving to state
         const billsWithFavorites = response.results.map((item) => ({
@@ -75,11 +78,11 @@ export default function TabPanel() {
 
   // Handle loading more bills
   const handleLoadMore = useCallback(
-    async (newSkip: number) => {
+    async (newSkip: number): Promise<void> => {
       if (isLoading) return; // Prevent multiple calls while loading
       try {
         setIsLoading(true);
-        const response = await fetchBills(false, 25, newSkip);
+        const response = await fetchBills(true, 25, newSkip);
         const newBillsWithFavorites = response.results.map((item) => ({
           ...item.bill,
           isFavorite: false,
@@ -99,8 +102,12 @@ export default function TabPanel() {
    * @param {React.SyntheticEvent} event - The event object
    * @param {number} newValue - Index of the newly selected tab
    */
-  const handleChange = useCallback((event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue)},[]);
+  const handleChange = useCallback(
+    (event: React.SyntheticEvent, newValue: number): void => {
+      setValue(newValue);
+    },
+    []
+  );
   return (
     <Box
       className="h-[650px] min-w-[1100px] border rounded-md p-0"
@@ -116,13 +123,14 @@ export default function TabPanel() {
         >
           <Tab label="Bills" {...a11yProps(0)} />
           <Tab label="Favourites" {...a11yProps(1)} />
+          <BillFilterSelect onFilterChange={handleFilterChange} />
         </Tabs>
       </Box>
 
       {/* Tab content panels */}
       <CustomTabPanel value={value} index={0}>
         <TabContent
-          bills={bills}
+          bills={activeFilter !== "All" && activeFilter ? filteredBills : bills}
           onLoadMore={handleLoadMore}
           isLoading={isLoading}
         />

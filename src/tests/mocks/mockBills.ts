@@ -2,8 +2,8 @@ export const mockBills = [
   {
     head: {
       counts: {
-        billCount: 4233,
-        resultCount: 4233,
+        billCount: 5,
+        resultCount: 5,
       },
       dateRange: {
         start: "1900-01-01T00:00:00.000Z",
@@ -66,7 +66,7 @@ export const mockBills = [
             },
           ],
           billNo: "64",
-          billType: "Public",
+          billType: "Private",
           billTypeURI:
             "https://data.oireachtas.ie/ie/oireachtas/def/bill-type/public",
           billYear: "2024",
@@ -938,7 +938,7 @@ export const mockBills = [
           act: null,
           amendmentLists: [],
           billNo: "97",
-          billType: "Public",
+          billType: "Private",
           billTypeURI:
             "https://data.oireachtas.ie/ie/oireachtas/def/bill-type/public",
           billYear: "2023",
@@ -1258,7 +1258,7 @@ export const mockBills = [
           act: null,
           amendmentLists: [],
           billNo: "61",
-          billType: "Public",
+          billType: "Govt",
           billTypeURI:
             "https://data.oireachtas.ie/ie/oireachtas/def/bill-type/public",
           billYear: "2024",
