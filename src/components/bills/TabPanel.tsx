@@ -2,8 +2,6 @@ import React, {useState, useEffect, useCallback, useRef} from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import { mockBills } from "@/tests/mocks/mockBills";
-import { BillsTable } from "./BillsTable";
 import { billsState } from "@/state/atoms/billsState";
 import { billHeadState } from "@/state/atoms/billHeadState";
 import { fetchBills } from "@/api/bills";
@@ -55,7 +53,7 @@ export default function TabPanel() {
       if (initialFetchRef.current) return; // Skip if already fetched
       initialFetchRef.current = true;
       try {
-        const response = await fetchBills(false, 10, 0);
+        const response = await fetchBills(false, 25, 0);
         setBillHead(response.head);
         // Add isFavorite flag to each bill before saving to state
         const billsWithFavorites = response.results.map((item) => ({
@@ -63,22 +61,25 @@ export default function TabPanel() {
           isFavorite: false,
         }));
         setBills(billsWithFavorites);
+        setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch bills:", error);
       }
     };
 
     if (bills.length === 0) {
+      setIsLoading(true);
       loadBills();
     }
   }, [setBills, setBillHead, bills.length]);
+
   // Handle loading more bills
   const handleLoadMore = useCallback(
     async (newSkip: number) => {
       if (isLoading) return; // Prevent multiple calls while loading
       try {
         setIsLoading(true);
-        const response = await fetchBills(false, 10, newSkip);
+        const response = await fetchBills(false, 25, newSkip);
         const newBillsWithFavorites = response.results.map((item) => ({
           ...item.bill,
           isFavorite: false,

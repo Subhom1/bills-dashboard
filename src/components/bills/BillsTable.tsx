@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Paper from "@mui/material/Paper";
 import { Bill } from "../../types/index";
 import Table from "@mui/material/Table";
@@ -8,7 +8,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TablePagination from "@mui/material/TablePagination";
-
+import {useRecoilValue} from "recoil";
+import {billHeadState} from "@/state/atoms/billHeadState";
 /**
  * Props interface for the BillsTable component
  * @interface BillsTableProps
@@ -26,9 +27,14 @@ interface BillsTableProps {
  * @param {BillsTableProps} props - Component props
  * @returns {JSX.Element} Rendered table component
  */
-export const BillsTable = ({ bills, onLoadMore, isLoading }: BillsTableProps) => {
+export const BillsTable = ({
+  bills,
+  onLoadMore,
+  isLoading,
+}: BillsTableProps) => {
   const [page, setPage] = useState(0);
-  const rowsPerPage = 10; // Fixed number of rows per page
+  const rowsPerPage = 25; // Fixed number of rows per page
+  const billHead = useRecoilValue(billHeadState);
 
   // Calculate the bills to display on the current page
   const displayedBills = bills.slice(
@@ -84,43 +90,58 @@ export const BillsTable = ({ bills, onLoadMore, isLoading }: BillsTableProps) =>
           {/* Table header with fixed column names */}
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: "bold" }}>Bill Number</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Bill Type</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Sponsor</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "100px" }}>Bill Number</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "100px" }}>Bill Type</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "100px" }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: "bold", width: "300px" }}>Sponsor</TableCell>
               <TableCell
                 align="center"
-                sx={{ fontWeight: "bold", width: "80px" }}
+                sx={{ fontWeight: "bold", width: "100px" }}
               >
                 Favorite
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayedBills.map((bill) => (
-              <TableRow
-                key={bill.uri}
-                sx={{
-                  "&:last-child td, &:last-child th": { border: 0 },
-                }}
-              >
-                <TableCell component="th" scope="row">
-                  {bill.billNo}
+            {displayedBills.length ? (
+              displayedBills.map((bill) => (
+                <TableRow
+                  key={bill.uri + Math.random()}
+                  sx={{
+                    "&:last-child td, &:last-child th": { border: 0 },
+                  }}
+                >
+                  <TableCell component="th" scope="row">
+                    {bill.billNo}
+                  </TableCell>
+                  <TableCell>{bill.billType}</TableCell>
+                  <TableCell>{bill.status}</TableCell>
+                  <TableCell>
+                    {bill.sponsors[0]?.sponsor.as.showAs || "No sponsor"}
+                  </TableCell>
+                  <TableCell align="center"></TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell 
+                  colSpan={5} 
+                  align="center" 
+                  sx={{ 
+                  height: '500px',
+                  verticalAlign: 'middle'
+                  }}
+                >
+                  Loading...
                 </TableCell>
-                <TableCell>{bill.billType}</TableCell>
-                <TableCell>{bill.status}</TableCell>
-                <TableCell>
-                  {bill.sponsors[0]?.sponsor.as.showAs || "No sponsor"}
-                </TableCell>
-                <TableCell align="center"></TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </TableContainer>
       <TablePagination
         component="div"
-        count={-1} //  -1 to enable infinite scrolling
+        count={billHead?.counts?.billCount || 0}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
