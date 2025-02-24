@@ -57,6 +57,7 @@ Using Recoil for state management with the following atoms:
 - `billsState`: Stores the current list of bills
 - `billHeadState`: Manages pagination metadata
 - `favoriteBillsState`: Maintains list of favorited bills
+- `fetchedPagesState`: Maintains list of visited pages
 
 ## Installation & Setup
 
@@ -124,7 +125,14 @@ src/tests/
 ├── components/     # Component tests
 │   ├── BillsTable.test.tsx
 │   ├── BillFilterSelect.test.tsx
-│   └── ModalTabPanel.test.tsx
+│   │── ModalTabPanel.test.tsx
+│   ├── TabContent.test.tsx
+│   ├── TabWrapper.test.tsx
+│   ├── ModalTabPanel.test.tsx
+│   ├── TableSkeleton.test.tsx
+│   ├── Loader.test.tsx
+│   ├── ErrorBoundary.test.tsx
+│   └── Layout.test.tsx
 ├── mocks/         # Mock data
 └── setupTests.ts  # Test configuration
 ```
@@ -134,14 +142,49 @@ src/tests/
 - Using ESLint for code linting
 - Prettier for code formatting
 - TypeScript strict mode enabled
-- Component documentation with JSDoc
 
 ## Performance Considerations
 
-- Implemented pagination for large datasets
-- Memoized expensive computations
-- Optimized re-renders with React.memo
-- Lazy loading for modal content
+### Table Optimization
+- Smart pagination with cached page tracking
+- Smooth loading transitions with skeleton states
+- Optimized table re-renders with fixed dimensions
+
+### Data Management
+- Intelligent data fetching with page caching
+- Prevents duplicate API calls for visited pages
+- Efficient duplicate prevention using Set data structure
+- Optimized state updates with batching
+
+### Component Optimization
+- Memoized expensive computations with `useMemo`
+- Optimized re-renders with `React.memo`
+- Lazy loading for modal and filter components
+- Consistent table heights to prevent layout shifts
+
+### State Management
+- Recoil atoms for efficient state updates
+- Tracking mechanism for fetched pages
+- Optimized favorite toggling with local state
+
+### Loading States
+- Skeleton loading with matched dimensions
+- Smooth transitions between states
+- Prevented layout shifts during loading
+- Consistent table dimensions across states
+
+### Code Examples
+
+```typescript
+// Example of page tracking implementation
+const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
+
+// Check if page is already fetched
+if (!fetchedPages.has(newPage)) {
+  await fetchData(newPage);
+  setFetchedPages(prev => new Set(prev).add(newPage));
+}
+```
 
 ## Browser Support
 
