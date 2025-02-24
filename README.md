@@ -4,6 +4,7 @@ A React application that allows users to view and manage bills from the Oireacht
 Users can filter bills, view details in English and Irish, and mark bills as favorites.
 
 ## Features
+
 ✅ Fetches and displays bills in a paginated table  
 ✅ Allows filtering bills by type  
 ✅ Opens a modal to view bill details (English & Gaeilge)  
@@ -26,19 +27,25 @@ Users can filter bills, view details in English and Irish, and mark bills as fav
 ## Key Components
 
 ### BillsTabPanel
+
 Main container component that manages the tabs for bills and favorites.
+
 - Handles tab switching logic
 - Manages bill filtering
 - Coordinates data fetching
 
 ### BillsTable
+
 Displays bills in a paginated table format.
+
 - Implements row-level click handling
 - Manages favorite toggling
 - Handles pagination
 
 ### ModalTabPanel
+
 Modal dialog for displaying detailed bill information.
+
 - Shows bill titles in English and Irish
 - Implements tabbed interface
 - Manages modal state
@@ -46,6 +53,7 @@ Modal dialog for displaying detailed bill information.
 ## State Management
 
 Using Recoil for state management with the following atoms:
+
 - `billsState`: Stores the current list of bills
 - `billHeadState`: Manages pagination metadata
 - `favoriteBillsState`: Maintains list of favorited bills
@@ -53,24 +61,28 @@ Using Recoil for state management with the following atoms:
 ## Installation & Setup
 
 ### Prerequisites
+
 - Node.js (22.0+)
 - npm
 
 ### Steps to Run
 
 1. **Clone the Repository**
+
    ```sh
    git clone https://github.com/Subhom1/bills-dashboard.git
    cd bills-dashboard
    ```
 
 2. **Install Dependencies**
+
    ```sh
    npm install
    ```
 
 3. **Environment Setup**
    Create a `.env` file in the root directory:
+
    ```env
    VITE_API_URL="https://api.oireachtas.ie/v1/"
    ```
@@ -93,6 +105,7 @@ Using Recoil for state management with the following atoms:
 ## Testing
 
 ### Running Tests
+
 ```sh
 # Run all tests
 npm test
@@ -105,6 +118,7 @@ npm run test:coverage
 ```
 
 ### Test Structure
+
 ```
 src/tests/
 ├── components/     # Component tests
@@ -145,6 +159,7 @@ src/tests/
 5. Open a Pull Request
 
 ### Commit Convention
+
 ```
 feat: Add new feature
 fix: Bug fix
@@ -160,6 +175,7 @@ chore: Tooling changes
 ### Common Issues
 
 1. **Port Already in Use**
+
    ```sh
    lsof -i :5173
    kill -9 <PID>
@@ -176,6 +192,6 @@ chore: Tooling changes
 
 ## Contact
 
-Subhom Kundu - [@SubhomKundu](https://twitter.com/SubhomKundu)
+Subhom Kundu - [@SubhomKundu](https://twitter.com/subhom_Kundu)
 
 Project Link: [https://github.com/Subhom1/bills-dashboard](https://github.com/Subhom1/bills-dashboard)
