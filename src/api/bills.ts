@@ -2,7 +2,7 @@ import axios from "axios";
 import { mockBills } from "@/tests/mocks/mockBills";
 import { Bill } from "@/types";
 import { API_CONFIG } from "./config";
-
+import { API_ENDPOINTS } from "@/constants/index";
 /**
  * Interface representing the structure of the bills API response
  * Contains metadata in the head object and an array of bill results
@@ -54,7 +54,7 @@ export const fetchBills = async (
 ): Promise<BillsResponse> => {
   if (isMock) return mockBills[0];
   try {
-    const { data } = await axiosInstance.get<BillsResponse>("/legislation", {
+    const { data } = await axiosInstance.get<BillsResponse>(API_ENDPOINTS.LEGISLATION, {
       params: {
         ...API_CONFIG.bills.params,
         limit: limit.toString(),

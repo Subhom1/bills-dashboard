@@ -5,6 +5,7 @@ import { billTypesSelector } from '@/state/selectors/billsSelector';
 import { billsState } from '@/state/atoms/billsState';
 import { Bill } from '@/types';
 import { useBillFilter } from '@/hooks/useBillFilter';
+import PropTypes from 'prop-types';
 interface BillFilterSelectProps {
   onFilterChange: (filteredBills: Bill[], type:string) => void;
 }
@@ -14,7 +15,7 @@ export const BillFilterSelect: React.FC<BillFilterSelectProps> = ({ onFilterChan
   const billTypes = useRecoilValue(billTypesSelector);
   const [bills] = useRecoilState(billsState);
 
-  const handleTypeChange = (event: any) => {
+  const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const type = event.target.value as string;
     setSelectedType(type);
     const filteredBills = useBillFilter(bills, type);
@@ -42,4 +43,7 @@ export const BillFilterSelect: React.FC<BillFilterSelectProps> = ({ onFilterChan
       </Select>
     </FormControl>
   );
+};
+BillFilterSelect.propTypes = {
+  onFilterChange: PropTypes.func.isRequired,
 };

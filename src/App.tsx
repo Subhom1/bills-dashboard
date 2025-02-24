@@ -1,6 +1,13 @@
 import "./App.css";
 import { Layout } from "./components/layout/_layout_";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
+
 function App() {
-  return <Layout />;
+  return (
+    <ErrorBoundary>
+      <Layout />
+    </ErrorBoundary>
+  );
 }
+
 export default App;

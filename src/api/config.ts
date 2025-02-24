@@ -3,6 +3,10 @@
  * Contains all the necessary settings for making API requests
  * Centralizes configuration to maintain consistency across the application
  */
+if (!import.meta.env.VITE_API_URL) {
+  throw new Error('VITE_API_URL environment variable is required');
+}
+
 export const API_CONFIG = {
   // Base URL from environment variables for different deployment environments
   baseURL: process.env.VITE_API_URL,

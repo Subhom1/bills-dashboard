@@ -1,4 +1,5 @@
 import { Bill } from '@/types';
+import PropTypes from 'prop-types';
 
 /**
  * Custom hook for filtering bills by type

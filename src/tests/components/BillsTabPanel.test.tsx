@@ -1,6 +1,6 @@
 // src/tests/components/TabPanel.test.tsx
 import { render, screen, fireEvent } from "@testing-library/react";
-import TabPanel from "@/components/bills/TabPanel";
+import BillsTabPanel from "@/components/bills/BillsTabPanel";
 import { RecoilRoot } from "recoil";
 import { mockBills } from "@/tests/mocks/mockBills";
 
@@ -22,7 +22,7 @@ describe("TabPanel Component", () => {
   beforeEach(() => {
     render(
       <RecoilRoot>
-        <TabPanel />
+        <BillsTabPanel />
       </RecoilRoot>
     );
   });

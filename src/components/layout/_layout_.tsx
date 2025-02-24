@@ -1,4 +1,4 @@
-import TabPanel from "@/components/bills/TabPanel";
+import BillsTabPanel from "@/components/bills/BillsTabPanel";
 
 /**
  * Layout Component
@@ -20,7 +20,7 @@ export const Layout = () => {
       </header>
 
       {/* Main content area with tab panels */}
-      <TabPanel />
+      <BillsTabPanel />
     </>
   );
 };
