@@ -84,7 +84,9 @@ describe("TabPanel Component", () => {
    */
   test("renders with correct styling classes", () => {
     const container = screen.getByRole("tabpanel").parentElement;
-    expect(container).toHaveClass("min-h-[600px]", "min-w-[1100px]");
+    expect(container).toHaveClass(
+      "h-[650px]", "min-w-[1100px]", "border rounded-md", "p-0 MuiBox-root css-rl6otz"
+    );
   });
 
   /**

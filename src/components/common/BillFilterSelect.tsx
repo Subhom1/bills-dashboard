@@ -1,5 +1,11 @@
 import React from 'react';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { billTypesSelector } from '@/state/selectors/billsSelector';
 import { billsState } from '@/state/atoms/billsState';
@@ -14,11 +20,11 @@ export const BillFilterSelect: React.FC<BillFilterSelectProps> = ({ onFilterChan
   const [selectedType, setSelectedType] = React.useState<string>('');
   const billTypes = useRecoilValue(billTypesSelector);
   const [bills] = useRecoilState(billsState);
+  const filteredBills = useBillFilter(bills, selectedType);
 
-  const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTypeChange = (event: SelectChangeEvent<string>) => {
     const type = event.target.value as string;
     setSelectedType(type);
-    const filteredBills = useBillFilter(bills, type);
     onFilterChange(filteredBills, type);
   };
 

@@ -7,13 +7,18 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TablePagination from "@mui/material/TablePagination";
-import { useRecoilValue } from "recoil";
+import { useRecoilValue, useRecoilState } from "recoil";
 import { billHeadState } from "@/state/atoms/billHeadState";
 import { ModalTabPanel } from "@/components/common/ModalTabPanel";
-import PropTypes from 'prop-types';
-import { Bill } from '@/types';
-import { PAGINATION } from '@/constants';
-import Loader from '@/components/common/Loader';
+import PropTypes from "prop-types";
+import { Bill } from "@/types";
+import { PAGINATION } from "@/constants";
+import Loader from "@/components/common/Loader";
+import IconButton from "@mui/material/IconButton";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
+import { favoriteService } from "@/api/bills";
 /**
  * Props interface for the BillsTable component
  * @interface BillsTableProps
@@ -39,8 +44,37 @@ export const BillsTable = ({
   const [page, setPage] = useState(0);
   const rowsPerPage = PAGINATION.ROWS_PER_PAGE; // Fixed number of rows per page
   const billHead = useRecoilValue(billHeadState);
+  const [favoriteBills, setFavoriteBills] = useRecoilState(favoriteBillsState);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  const handleFavoriteClick = async (bill: Bill) => {
+    try {
+      const isFavorite = !favoriteBills.some(fav => fav.uri === bill.uri);
+      
+      // Update UI immediately for better UX
+      setFavoriteBills(prevFavorites => {
+        if (isFavorite) {
+          return [...prevFavorites, bill];
+        }
+        return prevFavorites.filter(fav => fav.uri !== bill.uri);
+      });
+
+      // Call mock service
+      await favoriteService.toggleFavorite(bill, isFavorite);
+      
+    } catch (error) {
+      console.error('Failed to update favorite status:', error);
+      // Revert UI state on error
+      setFavoriteBills(prevFavorites => {
+        if (favoriteBills.some(fav => fav.uri === bill.uri)) {
+          return prevFavorites.filter(fav => fav.uri !== bill.uri);
+        }
+        return [...prevFavorites, bill];
+      });
+    }
+  };
+
   const handleCloseModal = () => {
     setModalOpen(false);
     setSelectedBill(null);
@@ -56,7 +90,6 @@ export const BillsTable = ({
       setModalOpen(true);
     }
   };
-
 
   // Calculate the bills to display on the current page
   const displayedBills = bills.slice(
@@ -176,33 +209,48 @@ export const BillsTable = ({
                     sx={{
                       cursor: "pointer",
                       "&:hover": {
-                        backgroundColor: "rgba(0, 0, 0, 0.04)",
+                        backgroundColor: favoriteBills.some(
+                          (fav) => fav.uri === bill.uri
+                        )
+                          ? "rgba(244, 67, 54, 0.1)"
+                          : "rgba(0, 0, 0, 0.04)",
                       },
                       "&:last-child td, &:last-child th": { border: 0 },
                       "& td:last-child": {
-                        cursor: "default", // Remove pointer cursor from favorite cell
+                        cursor: "default",
                       },
+                      backgroundColor: favoriteBills.some(
+                        (fav) => fav.uri === bill.uri
+                      )
+                        ? "rgba(244, 67, 54, 0.1)"
+                        : "inherit",
                     }}
                     onClick={(e) => handleRowClick(e, bill)}
                   >
-                    <TableCell
-                      component="th"
-                      scope="row"
-                      
-                    >
+                    <TableCell component="th" scope="row">
                       {bill.billNo}
                     </TableCell>
-                    <TableCell >
-                      {bill.billType}
-                    </TableCell>
-                    <TableCell >
-                      {bill.status}
-                    </TableCell>
-                    <TableCell >
+                    <TableCell>{bill.billType}</TableCell>
+                    <TableCell>{bill.status}</TableCell>
+                    <TableCell>
                       {bill.sponsors[0]?.sponsor.as.showAs || "No sponsor"}
                     </TableCell>
                     <TableCell align="center">
-                      {/* Favorite cell content */}
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFavoriteClick(bill);
+                        }}
+                        aria-label="toggle favorite"
+                        size="small"
+                        color="error"
+                      >
+                        {favoriteBills.some((fav) => fav.uri === bill.uri) ? (
+                          <FavoriteIcon />
+                        ) : (
+                          <FavoriteBorderIcon />
+                        )}
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))
@@ -240,15 +288,15 @@ BillsTable.propTypes = {
         PropTypes.shape({
           sponsor: PropTypes.shape({
             as: PropTypes.shape({
-              showAs: PropTypes.string
-            })
-          })
+              showAs: PropTypes.string,
+            }),
+          }),
         })
       ).isRequired,
       uri: PropTypes.string.isRequired,
-      isFavorite: PropTypes.bool
+      isFavorite: PropTypes.bool,
     })
   ).isRequired,
   onLoadMore: PropTypes.func,
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
 };

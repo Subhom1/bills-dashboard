@@ -24,6 +24,7 @@ export type Bill = {
   stages: Stage[];
   status: string;
   isFavorite?: boolean;
+  uri: string;
 };
 
 export type AmendmentList = {

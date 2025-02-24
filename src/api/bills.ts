@@ -67,3 +67,15 @@ export const fetchBills = async (
     throw error;
   }
 };
+
+export const favoriteService = {
+  toggleFavorite: async (bill: Bill, isFavorite: boolean): Promise<void> => {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    console.log(
+      `[Server] ${isFavorite ? "Adding" : "Removing"} bill ${bill.billNo} ${
+        isFavorite ? "to" : "from"
+      } favorites`
+    );
+  },
+};

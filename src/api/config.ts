@@ -3,9 +3,6 @@
  * Contains all the necessary settings for making API requests
  * Centralizes configuration to maintain consistency across the application
  */
-if (!import.meta.env.VITE_API_URL) {
-  throw new Error('VITE_API_URL environment variable is required');
-}
 
 export const API_CONFIG = {
   // Base URL from environment variables for different deployment environments
@@ -16,7 +13,7 @@ export const API_CONFIG = {
 
   // Standard headers for API requests
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 
   // Bills endpoint specific configuration
@@ -30,15 +27,15 @@ export const API_CONFIG = {
       bill_source: "Government,Private Member",
 
       // Date range for bill search
-      date_start: "1900-01-01",  // Historical bills from 1900
-      date_end: "2099-01-01",    // Future bills up to 2099
+      date_start: "1900-01-01", // Historical bills from 1900
+      date_end: "2099-01-01", // Future bills up to 2099
 
       // Pagination settings
-      limit: "1",    // Number of results per page
-      skip: "0",     // Number of results to skip (for pagination)
+      limit: "1", // Number of results per page
+      skip: "0", // Number of results to skip (for pagination)
 
       // Optional chamber filter
       chamber_id: "", // Empty for all chambers
-    }
-  }
+    },
+  },
 };

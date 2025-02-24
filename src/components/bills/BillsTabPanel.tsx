@@ -10,7 +10,7 @@ import { TabContent } from "./TabContent";
 import { TabWrapper } from "./TabWrapper";
 import { BillFilterSelect } from "@/components/common/BillFilterSelect";
 import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
-
+import { Bill, BillsResponseHead } from "@/types";
 /**
  * Helper function to generate accessibility props for tabs
  * @param {number} index - Index of the tab
