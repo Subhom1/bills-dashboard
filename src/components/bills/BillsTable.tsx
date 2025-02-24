@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Suspense, lazy, useCallback } from "react";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -9,7 +9,6 @@ import TableRow from "@mui/material/TableRow";
 import TablePagination from "@mui/material/TablePagination";
 import { useRecoilValue, useRecoilState } from "recoil";
 import { billHeadState } from "@/state/atoms/billHeadState";
-import { ModalTabPanel } from "@/components/common/ModalTabPanel";
 import PropTypes from "prop-types";
 import { Bill } from "@/types";
 import { PAGINATION } from "@/constants";
@@ -19,6 +18,14 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 import { favoriteService } from "@/api/bills";
+import { TableSkeleton } from "@/components/common/TableSkeleton";
+import { fetchedPagesState } from '@/state/atoms/fetchedPagesState';
+
+const ModalTabPanel = React.lazy(() => 
+  import('@/components/common/ModalTabPanel').then(module => ({
+    default: module.ModalTabPanel
+  }))
+);
 /**
  * Props interface for the BillsTable component
  * @interface BillsTableProps
@@ -42,6 +49,7 @@ export const BillsTable = ({
   isLoading = false,
 }: BillsTableProps) => {
   const [page, setPage] = useState(0);
+  const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
   const rowsPerPage = PAGINATION.ROWS_PER_PAGE; // Fixed number of rows per page
   const billHead = useRecoilValue(billHeadState);
   const [favoriteBills, setFavoriteBills] = useRecoilState(favoriteBillsState);
@@ -97,16 +105,27 @@ export const BillsTable = ({
     page * rowsPerPage + rowsPerPage
   );
   // Handle page change event
-  const handleChangePage = async (event: unknown, newPage: number) => {
-    if (isLoading) return; // Prevent multiple calls while loading
-    setPage(newPage);
+  const handleChangePage = useCallback(
+    async (_: unknown, newPage: number) => {
+      setPage(newPage);
+      
+      // Calculate the skip value based on page number
+      const skip = newPage * rowsPerPage;
+      
+      // Check if we already have this page's data
+      if (!fetchedPages.has(newPage) && onLoadMore) {
+        try {
+          await onLoadMore(skip);
+          // Add this page to fetched pages
+          setFetchedPages(prev => new Set(prev).add(newPage));
+        } catch (error) {
+          console.error('Failed to load more bills:', error);
+        }
+      }
+    },
+    [onLoadMore, rowsPerPage, fetchedPages, setFetchedPages]
+  );
 
-    // Only fetch more data when moving forward and onLoadMore is provided
-    if (newPage > page && onLoadMore) {
-      const newSkip = newPage * rowsPerPage;
-      await onLoadMore(newSkip);
-    }
-  };
   return (
     <>
       <Paper
@@ -168,19 +187,7 @@ export const BillsTable = ({
             </TableHead>
             <TableBody>
               {isLoading ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    align="center"
-                    sx={{
-                      height: "400px",
-                      verticalAlign: "middle",
-                      border: "none",
-                    }}
-                  >
-                    <Loader />
-                  </TableCell>
-                </TableRow>
+                <TableSkeleton />
               ) : displayedBills.length === 0 ? (
                 <TableRow>
                   <TableCell
@@ -195,9 +202,6 @@ export const BillsTable = ({
                     <div className="flex flex-col items-center">
                       <span className="text-gray-500 text-lg">
                         No Bills Found
-                      </span>
-                      <span className="text-gray-400 text-sm mt-2">
-                        Try adjusting your filters or search criteria
                       </span>
                     </div>
                   </TableCell>
@@ -269,11 +273,13 @@ export const BillsTable = ({
           disabled={isLoading}
         />
       </Paper>
-      <ModalTabPanel
-        open={modalOpen}
-        onClose={handleCloseModal}
-        bill={selectedBill}
-      />
+      <Suspense fallback={<Loader />}>
+        <ModalTabPanel
+          open={modalOpen}
+          onClose={handleCloseModal}
+          bill={selectedBill}
+        />
+      </Suspense>
     </>
   );
 };

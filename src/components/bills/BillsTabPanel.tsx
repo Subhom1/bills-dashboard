@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  Suspense,
+  lazy,
+} from "react";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
@@ -8,9 +15,16 @@ import { fetchBills } from "@/api/bills";
 import { useRecoilState } from "recoil";
 import { TabContent } from "./TabContent";
 import { TabWrapper } from "./TabWrapper";
-import { BillFilterSelect } from "@/components/common/BillFilterSelect";
 import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 import { Bill, BillsResponseHead } from "@/types";
+import Loader from "@/components/common/Loader";
+import {fetchedPagesState} from "@/state/atoms/fetchedPagesState";
+const BillFilterSelect = React.lazy(() =>
+  import("@/components/common/BillFilterSelect").then((module) => ({
+    default: module.BillFilterSelect,
+  }))
+);
+
 /**
  * Helper function to generate accessibility props for tabs
  * @param {number} index - Index of the tab
@@ -41,6 +55,7 @@ export default function BillsTabPanel() {
   const [activeFilter, setActiveFilter] = useState<string>("");
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
   // Use useRef to track if initial fetch has been made
   const initialFetchRef = useRef<boolean>(false);
   // Handler for filter changes
@@ -48,8 +63,9 @@ export default function BillsTabPanel() {
     (filteredBills: Bill[], type: string): void => {
       setFilteredBills(filteredBills);
       setActiveFilter(type);
+      setFetchedPages(new Set([0])); // Reset to initial page
     },
-    []
+    [setFetchedPages]
   );
 
   // Fetch bills from the API on initial render
@@ -70,6 +86,8 @@ export default function BillsTabPanel() {
       } catch (error) {
         setError(error instanceof Error ? error.message : "An error occurred");
         console.error("Failed to fetch bills:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -90,7 +108,13 @@ export default function BillsTabPanel() {
           ...item.bill,
           isFavorite: false,
         }));
-        setBills((prevBills) => [...prevBills, ...newBillsWithFavorites]);
+        setBills((prevBills) => {
+          const existingUris = new Set(prevBills.map((bill) => bill.uri));
+          const uniqueNewBills = newBillsWithFavorites.filter(
+            (bill) => !existingUris.has(bill.uri)
+          );
+          return [...prevBills, ...uniqueNewBills];
+        });
         setSkip(newSkip);
       } catch (error) {
         console.error("Failed to fetch more bills:", error);
@@ -137,7 +161,9 @@ export default function BillsTabPanel() {
           <Tab label="Bills" {...a11yProps(0)} />
           <Tab label="Favourites" {...a11yProps(1)} />
         </Tabs>
-        <BillFilterSelect onFilterChange={handleFilterChange} />
+        <Suspense fallback={<Loader />}>
+          <BillFilterSelect onFilterChange={handleFilterChange} />{" "}
+        </Suspense>
       </Box>
 
       {/* Tab content panels */}

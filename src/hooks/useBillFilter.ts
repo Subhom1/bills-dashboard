@@ -1,5 +1,6 @@
-import { Bill } from '@/types';
-import PropTypes from 'prop-types';
+import { Bill } from "@/types";
+
+import { useMemo } from "react";
 
 /**
  * Custom hook for filtering bills by type
@@ -8,8 +9,8 @@ import PropTypes from 'prop-types';
  * @returns {Bill[]} Filtered array of bills
  */
 export const useBillFilter = (bills: Bill[], filterType: string): Bill[] => {
-  if (!filterType || filterType === 'All') {
-    return bills;
-  }
-  return bills.filter(bill => bill.billType === filterType);
+  return useMemo(() => {
+    if (!filterType || filterType === "All") return bills;
+    return bills.filter((bill) => bill.billType === filterType);
+  }, [bills, filterType]);
 };

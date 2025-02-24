@@ -3,6 +3,8 @@ import { mockBills } from "@/tests/mocks/mockBills";
 import { Bill } from "@/types";
 import { API_CONFIG } from "./config";
 import { API_ENDPOINTS } from "@/constants/index";
+import { debounce } from 'lodash';
+
 /**
  * Interface representing the structure of the bills API response
  * Contains metadata in the head object and an array of bill results
@@ -68,6 +70,10 @@ export const fetchBills = async (
   }
 };
 
+export const debouncedFetchBills = debounce(async (skip: number) => {
+  return await fetchBills(false, 25, skip);
+}, 300);
+
 export const favoriteService = {
   toggleFavorite: async (bill: Bill, isFavorite: boolean): Promise<void> => {
     // Simulate API call
@@ -78,4 +84,17 @@ export const favoriteService = {
       } favorites`
     );
   },
+};
+
+const cache = new Map();
+
+export const fetchBillsWithCache = async (skip: number) => {
+  const cacheKey = `bills-${skip}`;
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+  
+  const response = await fetchBills(false, 25, skip);
+  cache.set(cacheKey, response);
+  return response;
 };
