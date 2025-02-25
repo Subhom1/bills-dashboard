@@ -15,7 +15,7 @@ export const Layout = () => {
   return (
     <>
       {/* Application header with title */}
-      <header className="text-left my-5 ml-5 font-semibold text-3xl">
+      <header className="text-left my-5 ml-5 font-semibold text-3xl" data-testid="layout-header">
         Bills Dashboard
       </header>
 

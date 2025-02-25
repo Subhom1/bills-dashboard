@@ -19,11 +19,11 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 import { favoriteService } from "@/api/bills";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
-import { fetchedPagesState } from '@/state/atoms/fetchedPagesState';
+import { fetchedPagesState } from "@/state/atoms/fetchedPagesState";
 
-const ModalTabPanel = React.lazy(() => 
-  import('@/components/common/ModalTabPanel').then(module => ({
-    default: module.ModalTabPanel
+const ModalTabPanel = React.lazy(() =>
+  import("@/components/common/ModalTabPanel").then((module) => ({
+    default: module.ModalTabPanel,
   }))
 );
 /**
@@ -39,7 +39,13 @@ interface BillsTableProps {
 
 /**
  * BillsTable Component
- * Displays a responsive table of bills with pagination and favorite functionality
+ *
+ * This is the main table component that displays all bills with features like:
+ * - Pagination
+ * - Favorite toggling
+ * - Row click to view details
+ * - Loading states with skeletons
+ * - Smart caching of loaded pages
  * @param {BillsTableProps} props - Component props
  * @returns {JSX.Element} Rendered table component
  */
@@ -48,35 +54,40 @@ export const BillsTable = ({
   onLoadMore = undefined,
   isLoading = false,
 }: BillsTableProps) => {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState<number>(0);
   const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
   const rowsPerPage = PAGINATION.ROWS_PER_PAGE; // Fixed number of rows per page
   const billHead = useRecoilValue(billHeadState);
   const [favoriteBills, setFavoriteBills] = useRecoilState(favoriteBillsState);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
+  /**
+   * Handles clicking the favorite icon for a bill
+   * Uses optimistic updates - updates UI first, then calls API
+   * If API fails, it reverts the UI change
+   */
   const handleFavoriteClick = async (bill: Bill) => {
     try {
-      const isFavorite = !favoriteBills.some(fav => fav.uri === bill.uri);
-      
-      // Update UI immediately for better UX
-      setFavoriteBills(prevFavorites => {
+      // Check if this bill is already a favorite
+      const isFavorite = !favoriteBills.some((fav) => fav.uri === bill.uri);
+
+      // Update UI immediately for better user experience
+      setFavoriteBills((prevFavorites) => {
         if (isFavorite) {
           return [...prevFavorites, bill];
         }
-        return prevFavorites.filter(fav => fav.uri !== bill.uri);
+        return prevFavorites.filter((fav) => fav.uri !== bill.uri);
       });
 
-      // Call mock service
+      // mock save to the server
       await favoriteService.toggleFavorite(bill, isFavorite);
-      
     } catch (error) {
-      console.error('Failed to update favorite status:', error);
-      // Revert UI state on error
-      setFavoriteBills(prevFavorites => {
-        if (favoriteBills.some(fav => fav.uri === bill.uri)) {
-          return prevFavorites.filter(fav => fav.uri !== bill.uri);
+      console.error("Failed to update favorite status:", error);
+      // If something went wrong, undo UI change
+      setFavoriteBills((prevFavorites) => {
+        if (favoriteBills.some((fav) => fav.uri === bill.uri)) {
+          return prevFavorites.filter((fav) => fav.uri !== bill.uri);
         }
         return [...prevFavorites, bill];
       });
@@ -88,8 +99,12 @@ export const BillsTable = ({
     setSelectedBill(null);
   };
 
+  /**
+   * Handles clicking on a table row
+   * Opens the detail modal unless user clicked the favorite button
+   */
   const handleRowClick = (event: React.MouseEvent, bill: Bill) => {
-    // Check if click is on the last cell (favorite column)
+    // Don't open modal if they clicked the favorite button
     const isLastCell = (event.target as HTMLElement).closest(
       "td:last-child, th:last-child"
     );
@@ -104,22 +119,28 @@ export const BillsTable = ({
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
-  // Handle page change event
+  /**
+   * Handles page changes in the table
+   * Smart-loads data only for pages we haven't seen before
+   */
   const handleChangePage = useCallback(
-    async (_: unknown, newPage: number) => {
+    async (
+      event: React.MouseEvent<HTMLButtonElement> | null,
+      newPage: number
+    ) => {
       setPage(newPage);
-      
-      // Calculate the skip value based on page number
+
+      // Calculate how many items to skip based on page number
       const skip = newPage * rowsPerPage;
-      
-      // Check if we already have this page's data
+
+      // Only load if we haven't seen this page before
       if (!fetchedPages.has(newPage) && onLoadMore) {
         try {
           await onLoadMore(skip);
-          // Add this page to fetched pages
-          setFetchedPages(prev => new Set(prev).add(newPage));
+          // Remember that we've loaded this page
+          setFetchedPages((prev) => new Set(prev).add(newPage));
         } catch (error) {
-          console.error('Failed to load more bills:', error);
+          console.error("Failed to load more bills:", error);
         }
       }
     },
@@ -161,10 +182,11 @@ export const BillsTable = ({
               },
             }}
             aria-label="bills table"
+            role="table"
           >
             {/* Table header with fixed column names */}
-            <TableHead>
-              <TableRow>
+            <TableHead role="columnheader">
+              <TableRow role="row">
                 <TableCell sx={{ fontWeight: "bold", width: "100px" }}>
                   Bill Number
                 </TableCell>
@@ -189,8 +211,9 @@ export const BillsTable = ({
               {isLoading ? (
                 <TableSkeleton />
               ) : displayedBills.length === 0 ? (
-                <TableRow>
+                <TableRow role="row">
                   <TableCell
+                    role="cell"
                     colSpan={5}
                     align="center"
                     sx={{
@@ -200,7 +223,7 @@ export const BillsTable = ({
                     }}
                   >
                     <div className="flex flex-col items-center">
-                      <span className="text-gray-500 text-lg">
+                      <span className="text-gray-500 text-lg" data-testid="no-bills">
                         No Bills Found
                       </span>
                     </div>
@@ -231,18 +254,18 @@ export const BillsTable = ({
                     }}
                     onClick={(e) => handleRowClick(e, bill)}
                   >
-                    <TableCell component="th" scope="row">
+                    <TableCell component="th" scope="row" role="cell">
                       {bill.billNo}
                     </TableCell>
-                    <TableCell>{bill.billType}</TableCell>
-                    <TableCell>{bill.status}</TableCell>
-                    <TableCell>
+                    <TableCell role="cell">{bill.billType}</TableCell>
+                    <TableCell role="cell">{bill.status}</TableCell>
+                    <TableCell role="cell">
                       {bill.sponsors[0]?.sponsor.as.showAs || "No sponsor"}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="center" role="cell">
                       <IconButton
                         onClick={(e) => {
-                          e.stopPropagation();
+                          e.stopPropagation(); // Prevent row click
                           handleFavoriteClick(bill);
                         }}
                         aria-label="toggle favorite"

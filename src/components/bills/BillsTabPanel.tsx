@@ -139,6 +139,7 @@ export default function BillsTabPanel() {
     <Box
       className="h-[650px] min-w-[1100px] border rounded-md p-0"
       sx={{ borderRadius: 2 }}
+      data-testid="bills-tab-panel"
     >
       {/* Tab navigation container */}
       <Box
