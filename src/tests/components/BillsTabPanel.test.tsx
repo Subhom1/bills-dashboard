@@ -1,36 +1,29 @@
-// src/tests/components/TabPanel.test.tsx
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import BillsTabPanel from "@/components/bills/BillsTabPanel";
 import { RecoilRoot } from "recoil";
-import { mockBills } from "@/tests/mocks/mockBills";
 
 /**
  * Test Suite for TabPanel Component
- * Verifies the functionality and accessibility of the tabbed interface
- * Tests include:
- * - Tab rendering and labeling
- * - Content switching behavior
- * - Accessibility compliance
- * - Styling and layout
+ * Verifies the functionality and accessibility of the tabbed interface.
  */
 describe("TabPanel Component", () => {
   /**
    * Setup before each test
-   * Renders the TabPanel within RecoilRoot for state management
-   * Ensures a fresh component instance for each test
+   * Ensures a fresh component instance for each test.
    */
-  beforeEach(() => {
-    render(
-      <RecoilRoot>
-        <BillsTabPanel />
-      </RecoilRoot>
+  beforeEach(async () => {
+    await waitFor(() =>
+      render(
+        <RecoilRoot>
+          <BillsTabPanel />
+        </RecoilRoot>
+      )
     );
   });
 
   /**
    * Test: Tab Labels
-   * Verifies that both tabs are rendered with correct text labels
-   * Ensures navigation options are visible to users
+   * Verifies that both tabs are rendered with correct text labels.
    */
   test("renders both tabs with correct labels", () => {
     expect(screen.getByText("Bills")).toBeInTheDocument();
@@ -39,36 +32,34 @@ describe("TabPanel Component", () => {
 
   /**
    * Test: Default Tab
-   * Checks if Bills tab is displayed by default
-   * Verifies correct ARIA labeling for initial render
+   * Checks if the Bills tab is displayed by default.
    */
-  test("displays Bills tab content by default", () => {
-    const billsPanel = screen.getByRole("tabpanel");
+  test("displays Bills tab content by default", async () => {
+    const billsPanel = await screen.findByRole("tabpanel");
     expect(billsPanel).toBeVisible();
     expect(billsPanel).toHaveAttribute("aria-labelledby", "simple-tab-0");
   });
 
   /**
    * Test: Tab Switching
-   * Validates that clicking Favourites tab shows correct content
-   * Checks proper ARIA attributes after tab switch
+   * Validates that clicking the Favourites tab shows correct content.
    */
-  test("switches to Favourites tab when clicked", () => {
+  test("switches to Favourites tab when clicked", async () => {
     const favouritesTab = screen.getByText("Favourites");
     fireEvent.click(favouritesTab);
 
-    const favouritesPanel = screen.getByRole("tabpanel");
+    const favouritesPanel = await screen.findByRole("tabpanel");
+
     expect(favouritesPanel).toBeVisible();
     expect(favouritesPanel).toHaveAttribute("aria-labelledby", "simple-tab-1");
-    expect(favouritesPanel).toHaveTextContent("Favourites");
+    expect(favouritesPanel).toHaveTextContent("No Favourite Bills Found");
   });
 
   /**
    * Test: Accessibility
-   * Ensures proper ARIA attributes for screen readers
-   * Validates tab selection state indicators
+   * Ensures proper ARIA attributes for screen readers.
    */
-  test("maintains proper ARIA attributes for accessibility", () => {
+  test("maintains proper ARIA attributes for accessibility", async () => {
     const tabList = screen.getByRole("tablist");
     expect(tabList).toHaveAttribute("aria-label", "bill tabs");
 
@@ -79,26 +70,28 @@ describe("TabPanel Component", () => {
 
   /**
    * Test: Styling
-   * Verifies component renders with correct responsive classes
-   * Checks minimum dimensions for proper layout
+   * Verifies component renders with correct responsive classes.
    */
-  test("renders with correct styling classes", () => {
-    const container = screen.getByRole("tabpanel").parentElement;
+  test("renders with correct styling classes", async () => {
+    const container = (await screen.findByRole("tabpanel")).parentElement;
     expect(container).toHaveClass(
-      "h-[650px]", "min-w-[1100px]", "border rounded-md", "p-0 MuiBox-root css-rl6otz"
+      "h-[650px]",
+      "min-w-[1100px]",
+      "border",
+      "rounded-md",
+      "p-0"
     );
   });
 
   /**
    * Test: Bills Table Content
-   * Validates that Bills tab contains the data table
-   * Checks table accessibility attributes
+   * Validates that Bills tab contains the data table.
    */
-  test("shows bills table in Bills tab", () => {
+  test("shows bills table in Bills tab", async () => {
     const billsTab = screen.getByText("Bills");
     fireEvent.click(billsTab);
-    
-    const table = screen.getByRole("table");
+
+    const table = await screen.findByRole("table");
     expect(table).toBeInTheDocument();
     expect(table).toHaveAttribute("aria-label", "bills table");
   });

@@ -12,6 +12,7 @@ interface TabContentProps {
   bills: Bill[];
   onLoadMore?: (skip: number) => Promise<void>;
   isLoading: boolean;
+  msg:string
 }
 
 /**
@@ -27,12 +28,13 @@ export const TabContent = React.memo(function TabContent({
   bills,
   onLoadMore,
   isLoading,
+  msg
 }: TabContentProps) {
   // Show loading or empty state when no bills are present
   if (!bills.length) {
     return (
       <div className="flex justify-center items-center h-[400px]">
-        {isLoading ? <Loader /> : "No Bills found"}
+        {isLoading ? <Loader /> : msg}
       </div>
     );
   }

@@ -18,7 +18,7 @@ import { TabWrapper } from "./TabWrapper";
 import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 import { Bill, BillsResponseHead } from "@/types";
 import Loader from "@/components/common/Loader";
-import {fetchedPagesState} from "@/state/atoms/fetchedPagesState";
+import { fetchedPagesState } from "@/state/atoms/fetchedPagesState";
 const BillFilterSelect = React.lazy(() =>
   import("@/components/common/BillFilterSelect").then((module) => ({
     default: module.BillFilterSelect,
@@ -173,10 +173,15 @@ export default function BillsTabPanel() {
           bills={activeFilter !== "All" && activeFilter ? filteredBills : bills}
           onLoadMore={handleLoadMore}
           isLoading={isLoading}
+          msg="No Bills Found"
         />
       </TabWrapper>
       <TabWrapper value={value} index={1}>
-        <TabContent bills={favoriteBills} isLoading={isLoading} />
+        <TabContent
+          bills={favoriteBills}
+          isLoading={isLoading}
+          msg="No Favourite Bills Found"
+        />
       </TabWrapper>
     </Box>
   );

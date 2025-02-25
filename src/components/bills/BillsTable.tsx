@@ -185,29 +185,42 @@ export const BillsTable = ({
             role="table"
           >
             {/* Table header with fixed column names */}
-            <TableHead role="columnheader">
+            <TableHead>
               <TableRow role="row">
-                <TableCell sx={{ fontWeight: "bold", width: "100px" }}>
+                <TableCell
+                  sx={{ fontWeight: "bold", width: "100px" }}
+                  role="columnheader"
+                >
                   Bill Number
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", width: "100px" }}>
+                <TableCell
+                  sx={{ fontWeight: "bold", width: "100px" }}
+                  role="columnheader"
+                >
                   Bill Type
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", width: "100px" }}>
+                <TableCell
+                  sx={{ fontWeight: "bold", width: "100px" }}
+                  role="columnheader"
+                >
                   Status
                 </TableCell>
-                <TableCell sx={{ fontWeight: "bold", width: "300px" }}>
+                <TableCell
+                  sx={{ fontWeight: "bold", width: "300px" }}
+                  role="columnheader"
+                >
                   Sponsor
                 </TableCell>
                 <TableCell
                   align="center"
                   sx={{ fontWeight: "bold", width: "100px" }}
+                  role="columnheader"
                 >
                   Favorite
                 </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody data-testid="bills-table-body">
               {isLoading ? (
                 <TableSkeleton />
               ) : displayedBills.length === 0 ? (
@@ -223,7 +236,10 @@ export const BillsTable = ({
                     }}
                   >
                     <div className="flex flex-col items-center">
-                      <span className="text-gray-500 text-lg" data-testid="no-bills">
+                      <span
+                        className="text-gray-500 text-lg"
+                        data-testid="no-bills"
+                      >
                         No Bills Found
                       </span>
                     </div>
@@ -271,6 +287,7 @@ export const BillsTable = ({
                         aria-label="toggle favorite"
                         size="small"
                         color="error"
+                        data-testid="favorite-button"
                       >
                         {favoriteBills.some((fav) => fav.uri === bill.uri) ? (
                           <FavoriteIcon />
