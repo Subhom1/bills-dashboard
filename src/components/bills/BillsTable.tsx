@@ -181,7 +181,6 @@ export const BillsTable = ({
     },
     [onLoadMore, rowsPerPage, fetchedPages, isFavoriteView, isFilterOn, maxPage]
   );
-  console.log("count", paginationCount, "page", page);
   return (
     <>
       <Paper
