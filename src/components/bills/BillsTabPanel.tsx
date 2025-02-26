@@ -11,7 +11,7 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { billsState } from "@/state/atoms/billsState";
 import { billHeadState } from "@/state/atoms/billHeadState";
-import { fetchBills } from "@/api/bills";
+import { fetchBillsWithCache } from "@/api/bills";
 import { useRecoilState } from "recoil";
 import { TabContent } from "./TabContent";
 import { TabWrapper } from "./TabWrapper";
@@ -19,7 +19,7 @@ import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 import { Bill, BillsResponseHead } from "@/types";
 import Loader from "@/components/common/Loader";
 import { fetchedPagesState } from "@/state/atoms/fetchedPagesState";
-const BillFilterSelect = React.lazy(() =>
+const BillFilterSelect = lazy(() =>
   import("@/components/common/BillFilterSelect").then((module) => ({
     default: module.BillFilterSelect,
   }))
@@ -74,13 +74,15 @@ export default function BillsTabPanel() {
       if (initialFetchRef.current) return; // Skip if already fetched
       initialFetchRef.current = true;
       try {
-        const response = await fetchBills(false, 25, 0);
-        setBillHead(response.head);
+        const response = await fetchBillsWithCache(false, 25, 0);
+        setBillHead(response?.head);
         // Add isFavorite flag to each bill before saving to state
-        const billsWithFavorites = response.results.map((item) => ({
-          ...item.bill,
-          isFavorite: false,
-        }));
+        const billsWithFavorites = response?.results.map(
+          (item: { bill: Bill }) => ({
+            ...item.bill,
+            isFavorite: false,
+          })
+        );
         setBills(billsWithFavorites);
         setIsLoading(false);
       } catch (error) {
@@ -97,33 +99,68 @@ export default function BillsTabPanel() {
     }
   }, [setBills, setBillHead, bills.length]);
 
-  // Handle loading more bills
+  /**
+   * Loads more bills when user scrolls or requests next page
+   * Handles pagination, deduplication, and state updates
+   *
+   * @param newSkip - Number of items to skip (pagination offset)
+   * @returns Promise that resolves when new bills are loaded
+   *
+   * Key features:
+   * - Prevents duplicate loading while in progress
+   * - Uses cached data when available
+   * - Deduplicates bills using URI as unique identifier
+   * - Preserves existing bills while adding new ones
+   * - Handles loading states and errors
+   */
   const handleLoadMore = useCallback(
     async (newSkip: number): Promise<void> => {
-      if (isLoading) return; // Prevent multiple calls while loading
+      // Safety check - don't load if already in progress
+      if (isLoading) return;
+
       try {
+        // Show loading spinner while fetching
         setIsLoading(true);
-        const response = await fetchBills(false, 25, newSkip);
-        const newBillsWithFavorites = response.results.map((item) => ({
-          ...item.bill,
-          isFavorite: false,
-        }));
+
+        // Get next batch of bills, using cache if available
+        const response = await fetchBillsWithCache(false, 25, newSkip);
+
+        // Transform API response to add favorite flag
+        const newBillsWithFavorites = response?.results.map(
+          (item: { bill: Bill }) => ({
+            ...item.bill,
+            isFavorite: false,
+          })
+        );
+
+        // Update bills state while removing duplicates
         setBills((prevBills) => {
+          // Create Set of existing bill URIs for quick lookup
           const existingUris = new Set(prevBills.map((bill) => bill.uri));
+
+          // Filter out any bills we already have
           const uniqueNewBills = newBillsWithFavorites.filter(
-            (bill) => !existingUris.has(bill.uri)
+            (bill: Bill) => !existingUris.has(bill.uri)
           );
+
+          // Combine existing and new bills
           return [...prevBills, ...uniqueNewBills];
         });
+
+        // Update pagination offset
         setSkip(newSkip);
       } catch (error) {
+        // Log any loading errors
         console.error("Failed to fetch more bills:", error);
       } finally {
+        // Always hide loading spinner when done
         setIsLoading(false);
       }
     },
+    // Only recreate if loading state or setBills function changes
     [isLoading, setBills]
   );
+
   /**
    * Handle tab change event
    * @param {React.SyntheticEvent} event - The event object
@@ -174,6 +211,7 @@ export default function BillsTabPanel() {
           onLoadMore={handleLoadMore}
           isLoading={isLoading}
           msg="No Bills Found"
+          isFavoriteView={false}
         />
       </TabWrapper>
       <TabWrapper value={value} index={1}>
@@ -181,6 +219,7 @@ export default function BillsTabPanel() {
           bills={favoriteBills}
           isLoading={isLoading}
           msg="No Favourite Bills Found"
+          isFavoriteView={true}
         />
       </TabWrapper>
     </Box>

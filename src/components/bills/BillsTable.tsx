@@ -35,6 +35,7 @@ interface BillsTableProps {
   bills: Bill[];
   onLoadMore?: (skip: number) => Promise<void>;
   isLoading?: boolean;
+  isFavoriteView?: boolean;
 }
 
 /**
@@ -53,6 +54,7 @@ export const BillsTable = ({
   bills,
   onLoadMore = undefined,
   isLoading = false,
+  isFavoriteView = false,
 }: BillsTableProps) => {
   const [page, setPage] = useState<number>(0);
   const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
@@ -129,7 +131,7 @@ export const BillsTable = ({
       newPage: number
     ) => {
       setPage(newPage);
-
+      if (isFavoriteView) return;
       // Calculate how many items to skip based on page number
       const skip = newPage * rowsPerPage;
 
@@ -144,7 +146,7 @@ export const BillsTable = ({
         }
       }
     },
-    [onLoadMore, rowsPerPage, fetchedPages, setFetchedPages]
+    [onLoadMore, rowsPerPage, fetchedPages, setFetchedPages, isFavoriteView]
   );
 
   return (
@@ -304,7 +306,7 @@ export const BillsTable = ({
         </TableContainer>
         <TablePagination
           component="div"
-          count={billHead?.counts?.billCount || 0}
+          count={isFavoriteView?bills.length: billHead?.counts?.billCount || 0}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

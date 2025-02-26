@@ -3,7 +3,6 @@ import { mockBills } from "@/tests/mocks/mockBills";
 import { Bill } from "@/types";
 import { API_CONFIG } from "./config";
 import { API_ENDPOINTS } from "@/constants/index";
-import { debounce } from 'lodash';
 
 /**
  * Interface representing the structure of the bills API response
@@ -56,23 +55,22 @@ export const fetchBills = async (
 ): Promise<BillsResponse> => {
   if (isMock) return mockBills[0];
   try {
-    const { data } = await axiosInstance.get<BillsResponse>(API_ENDPOINTS.LEGISLATION, {
-      params: {
-        ...API_CONFIG.bills.params,
-        limit: limit.toString(),
-        skip: skip.toString(),
-      },
-    });
+    const { data } = await axiosInstance.get<BillsResponse>(
+      API_ENDPOINTS.LEGISLATION,
+      {
+        params: {
+          ...API_CONFIG.bills.params,
+          limit: limit.toString(),
+          skip: skip.toString(),
+        },
+      }
+    );
     return data;
   } catch (error) {
     console.error("Failed to fetch bills:", error);
     throw error;
   }
 };
-
-export const debouncedFetchBills = debounce(async (skip: number) => {
-  return await fetchBills(false, 25, skip);
-}, 300);
 
 export const favoriteService = {
   toggleFavorite: async (bill: Bill, isFavorite: boolean): Promise<void> => {
@@ -88,13 +86,14 @@ export const favoriteService = {
 
 const cache = new Map();
 
-export const fetchBillsWithCache = async (skip: number) => {
+export const fetchBillsWithCache = async (isMock:boolean, limit: number, skip: number) => {
+  console.log(`Fetching bills with skip=${skip} and limit=${limit}`);
   const cacheKey = `bills-${skip}`;
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey);
   }
-  
-  const response = await fetchBills(false, 25, skip);
+
+  const response = await fetchBills(isMock, limit, skip);
   cache.set(cacheKey, response);
   return response;
 };

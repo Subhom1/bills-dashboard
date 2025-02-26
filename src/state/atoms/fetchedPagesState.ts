@@ -1,5 +1,4 @@
 import { atom } from 'recoil';
-import { Bill } from '@/types';
 /**
  * Recoil atom for storing fetched pages
  */
