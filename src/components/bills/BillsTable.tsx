@@ -6,7 +6,6 @@ import React, {
   JSX,
   useEffect,
   useMemo,
-  memo,
 } from "react";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";

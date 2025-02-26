@@ -71,7 +71,7 @@ export const ModalTabPanel = ({ open, onClose, bill }: ModalProps) => {
   const [value, setValue] = React.useState(0);
 
   // Handle switching between language tabs
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 

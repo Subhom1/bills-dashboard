@@ -6,7 +6,7 @@ Users can filter bills, view details in English and Irish, and mark bills as fav
 ## Features
 
 - Fetches and displays bills in a paginated table
-- Allows filtering bills by type
+- Allows filtering bills by bill status 
 - Opens a modal to view bill details (English & Gaeilge)
 - Enables favoriting/unfavoriting bills
 - Displays favorited bills in a separate tab
@@ -50,6 +50,13 @@ Modal dialog for displaying detailed bill information.
 - Implements tabbed interface
 - Manages modal state
 
+### BillFilterSelect
+
+Selectbox to show all bill status option for filtering
+
+- Shows bill statuses
+- Implements bills filtering by bill status
+
 ## State Management
 
 Using Recoil for state management with the following atoms:
@@ -58,6 +65,19 @@ Using Recoil for state management with the following atoms:
 - `billHeadState`: Manages pagination metadata
 - `favoriteBillsState`: Maintains list of favorited bills
 - `fetchedPagesState`: Maintains list of visited pages
+- `filterState`: Maintains selected filter state
+- `networkState`: Maintains device online/offline status 
+
+Recoil Selector for filtered states tailored to the component needs
+- `billSelectors`: This has one selector **filteredBillsSelector**;  extracts the filtered bills from the fetched dataset based on the filterState value selected by the **BillFilterSelct** component.
+
+## Network Calls Management
+
+- The `bills.ts` file manages network calls for fetching bills data from the Oireachtas API.
+- Uses an Axios instance configured with a base URL, timeout settings, and common headers to ensure consistent API calls.
+- The `fetchBills` function retrieves bills data, supporting pagination and mock data for testing.
+- The `favoriteService` object simulates API calls to toggle the favorite status of a bill.
+- The `fetchBillsWithCache` function caches API responses to reduce redundant network requests and improve performance.
 
 ## Installation & Setup
 
@@ -150,7 +170,7 @@ Using Recoil for state management with the following atoms:
 - **Quick Status Updates**: 
   - Filters bills by status (Current, Withdrawn, Enacted, etc.)
   - Updates immediately without waiting for API responses
-  - Maintains filter state while switching between tabs
+  - Resets filter state while switching between tabs
 - **Optimized Filter Performance**:
   - Uses [`useMemo`](src/components/bills/BillsTable.tsx) to cache filtered results
   - Prevents unnecessary re-filtering when pagination changes
