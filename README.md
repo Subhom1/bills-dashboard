@@ -79,6 +79,40 @@ Recoil Selector for filtered states tailored to the component needs
 - The `favoriteService` object simulates API calls to toggle the favorite status of a bill.
 - The `fetchBillsWithCache` function caches API responses to reduce redundant network requests and improve performance.
 
+## Error Management
+The `ErrorBoundary.tsx` file defines an `ErrorBoundary` component that acts as a safety net to catch JavaScript errors anywhere in its child component tree. This prevents the entire app from crashing when an error occurs and provides a user-friendly error message.
+
+### Props
+
+The `ErrorBoundary` component accepts the following props:
+
+- `children` (ReactNode): The components to be wrapped by the error boundary.
+
+### State
+
+The `ErrorBoundary` component manages the following state:
+
+- `hasError` (boolean): A flag indicating if an error occurred.
+- `error` (Error | null): The error that was caught, if any.
+
+### Features
+
+- **Catches Runtime Errors**: Captures JavaScript errors in child components and updates the state to trigger error UI rendering.
+- **User-Friendly Error Message**: Displays a centered error message on the screen when an error occurs.
+- **Error Logging**: Logs errors to the console for debugging purposes.
+- **Accessibility**: Provides an accessible error message container with appropriate ARIA roles and properties.
+
+### Usage
+
+To use the `ErrorBoundary` component, wrap it around any component that you want to protect from crashing due to errors:
+
+```tsx
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
+
+<ErrorBoundary>
+  <YourComponent />
+</ErrorBoundary>
+```
 ## Installation & Setup
 
 ### Prerequisites
