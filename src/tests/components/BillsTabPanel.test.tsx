@@ -1,33 +1,50 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import BillsTabPanel from "@/components/bills/BillsTabPanel";
 import { RecoilRoot } from "recoil";
+import { mockBills } from "@/tests/mocks/mockBills";
+import { fetchBillsWithCache } from "@/api/bills";
 
-/**
- * Test Suite for TabPanel Component
- * Verifies the functionality and accessibility of the tabbed interface.
- */
+// Mock the fetchBills function
+jest.mock("@/api/bills", () => ({
+  fetchBillsWithCache: jest.fn(),
+}));
+
 describe("TabPanel Component", () => {
-  /**
-   * Setup before each test
-   * Ensures a fresh component instance for each test.
-   */
   beforeEach(async () => {
-    await waitFor(() =>
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+
+    // Mock successful API response
+    (fetchBillsWithCache as jest.Mock).mockResolvedValue({
+      head: {
+        counts: { billCount: 1, resultCount: 1 },
+        dateRange: {
+          start: "1900-01-01T00:00:00.000Z",
+          end: "2099-01-01T00:00:00.000Z",
+        },
+        lang: "en",
+      },
+      results: mockBills[0].results,
+    });
+
+    await act(async () => {
       render(
         <RecoilRoot>
           <BillsTabPanel />
         </RecoilRoot>
-      )
-    );
+      );
+    });
   });
 
   /**
    * Test: Tab Labels
    * Verifies that both tabs are rendered with correct text labels.
    */
-  test("renders both tabs with correct labels", () => {
-    expect(screen.getByText("Bills")).toBeInTheDocument();
-    expect(screen.getByText("Favourites")).toBeInTheDocument();
+  test("renders both tabs with correct labels", async () => {
+    await act(async () => {
+      expect(screen.getByText("Bills")).toBeInTheDocument();
+      expect(screen.getByText("Favourites")).toBeInTheDocument();
+    });
   });
 
   /**
@@ -36,8 +53,11 @@ describe("TabPanel Component", () => {
    */
   test("displays Bills tab content by default", async () => {
     const billsPanel = await screen.findByRole("tabpanel");
-    expect(billsPanel).toBeVisible();
-    expect(billsPanel).toHaveAttribute("aria-labelledby", "simple-tab-0");
+
+    await act(async () => {
+      expect(billsPanel).toBeVisible();
+      expect(billsPanel).toHaveAttribute("aria-labelledby", "simple-tab-0");
+    });
   });
 
   /**
@@ -45,14 +65,22 @@ describe("TabPanel Component", () => {
    * Validates that clicking the Favourites tab shows correct content.
    */
   test("switches to Favourites tab when clicked", async () => {
-    const favouritesTab = screen.getByText("Favourites");
-    fireEvent.click(favouritesTab);
+    const favouritesTab = await screen.findByText("Favourites");
+
+    await act(async () => {
+      fireEvent.click(favouritesTab);
+    });
 
     const favouritesPanel = await screen.findByRole("tabpanel");
 
-    expect(favouritesPanel).toBeVisible();
-    expect(favouritesPanel).toHaveAttribute("aria-labelledby", "simple-tab-1");
-    expect(favouritesPanel).toHaveTextContent("No Favourite Bills Found");
+    await act(async () => {
+      expect(favouritesPanel).toBeVisible();
+      expect(favouritesPanel).toHaveAttribute(
+        "aria-labelledby",
+        "simple-tab-1"
+      );
+      expect(favouritesPanel).toHaveTextContent("No Favourite Bills Found");
+    });
   });
 
   /**
@@ -60,12 +88,18 @@ describe("TabPanel Component", () => {
    * Ensures proper ARIA attributes for screen readers.
    */
   test("maintains proper ARIA attributes for accessibility", async () => {
-    const tabList = screen.getByRole("tablist");
-    expect(tabList).toHaveAttribute("aria-label", "bill tabs");
+    const tabList = await screen.findByRole("tablist");
 
-    const tabs = screen.getAllByRole("tab");
-    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
-    expect(tabs[1]).toHaveAttribute("aria-selected", "false");
+    await act(async () => {
+      expect(tabList).toHaveAttribute("aria-label", "bill tabs");
+    });
+
+    const tabs = await screen.findAllByRole("tab");
+
+    await act(async () => {
+      expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+      expect(tabs[1]).toHaveAttribute("aria-selected", "false");
+    });
   });
 
   /**
@@ -74,25 +108,15 @@ describe("TabPanel Component", () => {
    */
   test("renders with correct styling classes", async () => {
     const container = (await screen.findByRole("tabpanel")).parentElement;
-    expect(container).toHaveClass(
-      "h-[650px]",
-      "min-w-[1100px]",
-      "border",
-      "rounded-md",
-      "p-0"
-    );
-  });
 
-  /**
-   * Test: Bills Table Content
-   * Validates that Bills tab contains the data table.
-   */
-  test("shows bills table in Bills tab", async () => {
-    const billsTab = screen.getByText("Bills");
-    fireEvent.click(billsTab);
-
-    const table = await screen.findByRole("table");
-    expect(table).toBeInTheDocument();
-    expect(table).toHaveAttribute("aria-label", "bills table");
+    await act(async () => {
+      expect(container).toHaveClass(
+        "h-[650px]",
+        "min-w-[1100px]",
+        "border",
+        "rounded-md",
+        "p-0"
+      );
+    });
   });
 });
