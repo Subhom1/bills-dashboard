@@ -5,6 +5,11 @@ import { BillsTable } from "@/components/bills/BillsTable";
 import { mockBills } from "@/tests/mocks/mockBills";
 
 // Ensure mockBills is correctly typed as Bill[]
+// This line performs a type assertion to ensure that the mockBills data is treated as an array of Bill objects (Bill[]).
+// TypeScript's type assertion is used here to explicitly tell the compiler that mockBills should be treated as Bill[].
+// The 'as unknown' part is an intermediate step to bypass TypeScript's type checking, casting mockBills to the unknown type first.
+// Then, it casts the result to Bill[], ensuring that the mock data is correctly typed for use in the tests.
+// This helps with type safety and prevents type-related errors, ensuring that the bills prop in the TabContent component is correctly typed as Bill[].
 const typedMockBills: Bill[] = mockBills as unknown as Bill[];
 
 // Mock the Loader component to isolate the TabContent component for testing

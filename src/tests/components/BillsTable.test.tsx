@@ -85,30 +85,6 @@ describe("BillsTable Component", () => {
       expect(favoriteService.toggleFavorite).toHaveBeenCalledTimes(1);
     });
   });
-
-  // Props Validation
-  // test("handles isLoading prop", async () => {
-  //   await renderComponent({ isLoading: false });
-  //   await act(async () => {
-  //     const nextPageButton = screen.getByRole("button", {
-  //       name: /go to next page/i,
-  //     });
-  //     expect(nextPageButton).toBeDisabled();
-  //   });
-  // });
-
-  // test("disables pagination when isLoading is true", async () => {
-  //   await renderComponent({ isLoading: true });
-  //   await waitFor(() => expect(screen.getByRole("table")).toBeInTheDocument());
-  //   await waitFor(() => {
-  //     const nextPageButton = screen.getByRole("button", {
-  //       name: /go to next page/i,
-  //     });
-  //     expect(nextPageButton).toBeDisabled();
-  //   });
-  // });
-
-
   // State Management
   test("maintains favorite state after page change", async () => {
     await renderComponent();

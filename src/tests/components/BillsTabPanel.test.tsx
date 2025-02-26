@@ -36,10 +36,9 @@ describe("TabPanel Component", () => {
     });
   });
 
-  /**
-   * Test: Tab Labels
-   * Verifies that both tabs are rendered with correct text labels.
-   */
+  //Test: Tab Labels
+  //Verifies that both tabs are rendered with correct text labels.
+
   test("renders both tabs with correct labels", async () => {
     await act(async () => {
       expect(screen.getByText("Bills")).toBeInTheDocument();
@@ -47,10 +46,8 @@ describe("TabPanel Component", () => {
     });
   });
 
-  /**
-   * Test: Default Tab
-   * Checks if the Bills tab is displayed by default.
-   */
+  //Test: Default Tab
+  //Checks if the Bills tab is displayed by default.
   test("displays Bills tab content by default", async () => {
     const billsPanel = await screen.findByRole("tabpanel");
 
@@ -60,10 +57,8 @@ describe("TabPanel Component", () => {
     });
   });
 
-  /**
-   * Test: Tab Switching
-   * Validates that clicking the Favourites tab shows correct content.
-   */
+  //Test: Tab Switching
+  //Validates that clicking the Favourites tab shows correct content.
   test("switches to Favourites tab when clicked", async () => {
     const favouritesTab = await screen.findByText("Favourites");
 
@@ -83,10 +78,9 @@ describe("TabPanel Component", () => {
     });
   });
 
-  /**
-   * Test: Accessibility
-   * Ensures proper ARIA attributes for screen readers.
-   */
+  //Test: Accessibility
+ //Ensures proper ARIA attributes for screen readers.
+
   test("maintains proper ARIA attributes for accessibility", async () => {
     const tabList = await screen.findByRole("tablist");
 
@@ -102,10 +96,9 @@ describe("TabPanel Component", () => {
     });
   });
 
-  /**
-   * Test: Styling
-   * Verifies component renders with correct responsive classes.
-   */
+  //Test: Styling
+  // Verifies component renders with correct responsive classes.
+
   test("renders with correct styling classes", async () => {
     const container = (await screen.findByRole("tabpanel")).parentElement;
 

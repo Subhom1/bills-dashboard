@@ -29,7 +29,7 @@ describe("Layout Component", () => {
   });
 
   // Helper function to render our component with necessary providers and state
-  const renderComponent = (children?: React.ReactNode) => {
+  const renderComponent = () => {
     return render(
       <RecoilRoot
         initializeState={({ set }) => {

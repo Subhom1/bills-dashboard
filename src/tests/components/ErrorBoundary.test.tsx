@@ -1,4 +1,3 @@
-// src/tests/components/ErrorBoundary.test.tsx
 import { render, screen } from '@testing-library/react';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
