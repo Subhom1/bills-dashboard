@@ -1,4 +1,13 @@
-import React, { useState, Suspense, lazy, useCallback } from "react";
+import React, {
+  useState,
+  Suspense,
+  lazy,
+  useCallback,
+  JSX,
+  useEffect,
+  useMemo,
+  memo,
+} from "react";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -21,7 +30,7 @@ import { favoriteService } from "@/api/bills";
 import { TableSkeleton } from "@/components/common/TableSkeleton";
 import { fetchedPagesState } from "@/state/atoms/fetchedPagesState";
 
-const ModalTabPanel = React.lazy(() =>
+const ModalTabPanel = lazy(() =>
   import("@/components/common/ModalTabPanel").then((module) => ({
     default: module.ModalTabPanel,
   }))
@@ -36,6 +45,8 @@ interface BillsTableProps {
   onLoadMore?: (skip: number) => Promise<void>;
   isLoading?: boolean;
   isFavoriteView?: boolean;
+  isFilterOn?: boolean;
+  filteredBillLength?: number;
 }
 
 /**
@@ -55,7 +66,9 @@ export const BillsTable = ({
   onLoadMore = undefined,
   isLoading = false,
   isFavoriteView = false,
-}: BillsTableProps) => {
+  isFilterOn = false,
+  filteredBillLength = 0,
+}: BillsTableProps): JSX.Element => {
   const [page, setPage] = useState<number>(0);
   const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
   const rowsPerPage = PAGINATION.ROWS_PER_PAGE; // Fixed number of rows per page
@@ -63,6 +76,26 @@ export const BillsTable = ({
   const [favoriteBills, setFavoriteBills] = useRecoilState(favoriteBillsState);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  const paginationCount = useMemo(() => {
+    if (isFavoriteView) {
+      return bills.length;
+    }
+    if (isFilterOn) {
+      return filteredBillLength;
+    }
+    return billHead?.counts?.billCount || 0;
+  }, [isFavoriteView, isFilterOn, bills.length, filteredBillLength, billHead]);
+
+  const maxPage = useMemo(() => {
+    return Math.max(0, Math.ceil(paginationCount / rowsPerPage) - 1);
+  }, [paginationCount, rowsPerPage]);
+
+  useEffect(() => {
+    if (isFilterOn) {
+      setPage(0);
+    }
+  }, [isFilterOn]);
 
   /**
    * Handles clicking the favorite icon for a bill
@@ -117,38 +150,38 @@ export const BillsTable = ({
   };
 
   // Calculate the bills to display on the current page
-  const displayedBills = bills.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
+  const displayedBills = useMemo(() => {
+    return bills.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [bills, page, rowsPerPage]);
   /**
    * Handles page changes in the table
    * Smart-loads data only for pages we haven't seen before
    */
   const handleChangePage = useCallback(
     async (
-      event: React.MouseEvent<HTMLButtonElement> | null,
+      _event: React.MouseEvent<HTMLButtonElement> | null,
       newPage: number
     ) => {
-      setPage(newPage);
-      if (isFavoriteView) return;
+      const validPage = Math.max(0, Math.min(newPage, maxPage));
+      setPage(validPage);
+      if (isFavoriteView || isFilterOn) return;
       // Calculate how many items to skip based on page number
-      const skip = newPage * rowsPerPage;
+      const skip = validPage * rowsPerPage;
 
       // Only load if we haven't seen this page before
-      if (!fetchedPages.has(newPage) && onLoadMore) {
+      if (!fetchedPages.has(validPage) && onLoadMore) {
         try {
           await onLoadMore(skip);
-          // Remember that we've loaded this page
-          setFetchedPages((prev) => new Set(prev).add(newPage));
+          //To Remember that we've loaded this page
+          setFetchedPages((prev) => new Set(prev).add(validPage));
         } catch (error) {
           console.error("Failed to load more bills:", error);
         }
       }
     },
-    [onLoadMore, rowsPerPage, fetchedPages, setFetchedPages, isFavoriteView]
+    [onLoadMore, rowsPerPage, fetchedPages, isFavoriteView, isFilterOn, maxPage]
   );
-
+  console.log("count", paginationCount, "page", page);
   return (
     <>
       <Paper
@@ -306,9 +339,9 @@ export const BillsTable = ({
         </TableContainer>
         <TablePagination
           component="div"
-          count={isFavoriteView?bills.length: billHead?.counts?.billCount || 0}
+          count={paginationCount}
           rowsPerPage={rowsPerPage}
-          page={page}
+          page={Math.min(page, maxPage)}
           onPageChange={handleChangePage}
           rowsPerPageOptions={[]}
           labelRowsPerPage={""}

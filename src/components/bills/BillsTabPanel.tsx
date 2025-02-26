@@ -12,13 +12,15 @@ import Box from "@mui/material/Box";
 import { billsState } from "@/state/atoms/billsState";
 import { billHeadState } from "@/state/atoms/billHeadState";
 import { fetchBillsWithCache } from "@/api/bills";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { TabContent } from "./TabContent";
 import { TabWrapper } from "./TabWrapper";
 import { favoriteBillsState } from "@/state/atoms/favoriteBillsState";
 import { Bill, BillsResponseHead } from "@/types";
 import Loader from "@/components/common/Loader";
-import { fetchedPagesState } from "@/state/atoms/fetchedPagesState";
+import { filteredBillsSelector } from "@/state/selectors/billsSelector";
+import { filterState } from "@/state/atoms/filterState";
+import { Alert, AlertTitle } from "@mui/material";
 const BillFilterSelect = lazy(() =>
   import("@/components/common/BillFilterSelect").then((module) => ({
     default: module.BillFilterSelect,
@@ -46,26 +48,24 @@ function a11yProps(index: number) {
 export default function BillsTabPanel() {
   const [value, setValue] = useState<number>(0);
   const [bills, setBills] = useRecoilState<Bill[]>(billsState);
-  const [billHead, setBillHead] =
-    useRecoilState<BillsResponseHead>(billHeadState);
+  const  setBillHead=
+    useSetRecoilState<BillsResponseHead>(billHeadState);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [skip, setSkip] = useState<number>(0);
-  const [favoriteBills, setFavoriteBills] =
-    useRecoilState<Bill[]>(favoriteBillsState);
+  const favoriteBills=
+    useRecoilValue<Bill[]>(favoriteBillsState);
   const [activeFilter, setActiveFilter] = useState<string>("");
-  const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
+  const paginatedFilteredBills = useRecoilValue<Bill[]>(filteredBillsSelector);
+  const [filter, setFilter] = useRecoilState<string>(filterState);
   // Use useRef to track if initial fetch has been made
   const initialFetchRef = useRef<boolean>(false);
   // Handler for filter changes
   const handleFilterChange = useCallback(
-    (filteredBills: Bill[], type: string): void => {
-      setFilteredBills(filteredBills);
+    (type: string): void => {
+      setFilter(type);
       setActiveFilter(type);
-      setFetchedPages(new Set([0])); // Reset to initial page
     },
-    [setFetchedPages]
+    [setFilter]
   );
 
   // Fetch bills from the API on initial render
@@ -146,9 +146,6 @@ export default function BillsTabPanel() {
           // Combine existing and new bills
           return [...prevBills, ...uniqueNewBills];
         });
-
-        // Update pagination offset
-        setSkip(newSkip);
       } catch (error) {
         // Log any loading errors
         console.error("Failed to fetch more bills:", error);
@@ -160,17 +157,21 @@ export default function BillsTabPanel() {
     // Only recreate if loading state or setBills function changes
     [isLoading, setBills]
   );
-
   /**
    * Handle tab change event
    * @param {React.SyntheticEvent} event - The event object
    * @param {number} newValue - Index of the newly selected tab
    */
   const handleChange = useCallback(
-    (event: React.SyntheticEvent, newValue: number): void => {
+    (_event: React.SyntheticEvent, newValue: number): void => {
       setValue(newValue);
+      setFilter("");
+      setActiveFilter("");
     },
-    []
+    [setFilter]
+  );
+  const filteredFavBills = favoriteBills.filter((bill) =>
+    bill.status.toLowerCase().includes(filter.toLowerCase())
   );
   return (
     <Box
@@ -200,28 +201,57 @@ export default function BillsTabPanel() {
           <Tab label="Favourites" {...a11yProps(1)} />
         </Tabs>
         <Suspense fallback={<Loader />}>
-          <BillFilterSelect onFilterChange={handleFilterChange} />{" "}
+          <BillFilterSelect
+            onFilterChange={handleFilterChange}
+            activeTab={value}
+          />
         </Suspense>
       </Box>
 
-      {/* Tab content panels */}
-      <TabWrapper value={value} index={0}>
-        <TabContent
-          bills={activeFilter !== "All" && activeFilter ? filteredBills : bills}
-          onLoadMore={handleLoadMore}
-          isLoading={isLoading}
-          msg="No Bills Found"
-          isFavoriteView={false}
-        />
-      </TabWrapper>
-      <TabWrapper value={value} index={1}>
-        <TabContent
-          bills={favoriteBills}
-          isLoading={isLoading}
-          msg="No Favourite Bills Found"
-          isFavoriteView={true}
-        />
-      </TabWrapper>
+      {/* Show error message if present or Tab content panels */}
+      {error ? (
+        <Alert
+          severity="error"
+          onClose={() => setError(null)}
+          sx={{ mb: 2 }}
+          data-testid="error-alert"
+        >
+          <AlertTitle>Error</AlertTitle>
+          {error}
+        </Alert>
+      ) : (
+        <>
+          <TabWrapper value={value} index={0}>
+            <TabContent
+              bills={
+                activeFilter !== "All" && activeFilter
+                  ? paginatedFilteredBills
+                  : bills
+              }
+              onLoadMore={handleLoadMore}
+              isLoading={isLoading}
+              msg="No Bills Found"
+              isFavoriteView={false}
+              isFilterOn={activeFilter !== "All" && !!activeFilter}
+              filteredBillLength={paginatedFilteredBills.length}
+            />
+          </TabWrapper>
+          <TabWrapper value={value} index={1}>
+            <TabContent
+              bills={
+                activeFilter !== "All" && activeFilter
+                  ? filteredFavBills
+                  : favoriteBills
+              }
+              isLoading={isLoading}
+              msg="No Favourite Bills Found"
+              isFavoriteView={true}
+              isFilterOn={activeFilter !== "All" && !!activeFilter}
+              filteredBillLength={paginatedFilteredBills.length}
+            />
+          </TabWrapper>
+        </>
+      )}
     </Box>
   );
 }

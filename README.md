@@ -5,14 +5,14 @@ Users can filter bills, view details in English and Irish, and mark bills as fav
 
 ## Features
 
-✅ Fetches and displays bills in a paginated table  
-✅ Allows filtering bills by type  
-✅ Opens a modal to view bill details (English & Gaeilge)  
-✅ Enables favoriting/unfavoriting bills  
-✅ Displays favorited bills in a separate tab  
-✅ Uses Material UI for styling  
-✅ Written in TypeScript  
-✅ Includes unit tests with Jest & React Testing Library
+- Fetches and displays bills in a paginated table
+- Allows filtering bills by type
+- Opens a modal to view bill details (English & Gaeilge)
+- Enables favoriting/unfavoriting bills
+- Displays favorited bills in a separate tab
+- Uses Material UI for styling
+- Written in TypeScript
+- Includes unit tests with Jest & React Testing Library
 
 ## Tech Stack
 
@@ -74,7 +74,7 @@ Using Recoil for state management with the following atoms:
    git clone https://github.com/Subhom1/bills-dashboard.git
    cd bills-dashboard
    ```
-
+   'main' is the latest updated branch
 2. **Install Dependencies**
 
    ```sh
@@ -103,40 +103,6 @@ Using Recoil for state management with the following atoms:
 - `npm run lint` - Run ESLint
 - `npm run preview` - Preview production build
 
-## Testing
-
-### Running Tests
-
-```sh
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Generate coverage report
-npm run test:coverage
-```
-
-### Test Structure
-
-```
-src/tests/
-├── components/     # Component tests
-│   ├── BillsTable.test.tsx
-│   ├── BillFilterSelect.test.tsx
-│   │── ModalTabPanel.test.tsx
-│   ├── TabContent.test.tsx
-│   ├── TabWrapper.test.tsx
-│   ├── ModalTabPanel.test.tsx
-│   ├── TableSkeleton.test.tsx
-│   ├── Loader.test.tsx
-│   ├── ErrorBoundary.test.tsx
-│   └── Layout.test.tsx
-├── mocks/         # Mock data
-└── setupTests.ts  # Test configuration
-```
-
 ## Code Style
 
 - Using ESLint for code linting
@@ -146,52 +112,57 @@ src/tests/
 ## Performance Considerations
 
 ### Table Optimization
+
 - Smart pagination with cached page tracking
 - Smooth loading transitions with skeleton states
 - Optimized table re-renders with fixed dimensions
 
 ### Data Management
+
 - Intelligent data fetching with page caching
 - Prevents duplicate API calls for visited pages
 - Efficient duplicate prevention using Set data structure
-- Optimized state updates with batching
 
 ### Component Optimization
+
 - Memoized expensive computations with `useMemo`
 - Optimized re-renders with `React.memo`
 - Lazy loading for modal and filter components
 - Consistent table heights to prevent layout shifts
 
 ### State Management
+
 - Recoil atoms for efficient state updates
 - Tracking mechanism for fetched pages
 - Optimized favorite toggling with local state
 
 ### Loading States
+
 - Skeleton loading with matched dimensions
 - Smooth transitions between states
 - Prevented layout shifts during loading
 - Consistent table dimensions across states
 
-### Code Examples
+### Smart Filtering System 
 
-```typescript
-// Example of page tracking implementation
-const [fetchedPages, setFetchedPages] = useRecoilState(fetchedPagesState);
-
-// Check if page is already fetched
-if (!fetchedPages.has(newPage)) {
-  await fetchData(newPage);
-  setFetchedPages(prev => new Set(prev).add(newPage));
-}
-```
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+- **Efficient Filter State**: Uses [`filterState`](src/state/atoms/filterState.ts) atom to manage filter selections without re-rendering the entire table
+- **Smart Filter Logic**: The [`filteredBillsSelector`](src/state/selectors/billsSelector.ts) only applies filters to the fetched dataset
+- **Quick Status Updates**: 
+  - Filters bills by status (Current, Withdrawn, Enacted, etc.)
+  - Updates immediately without waiting for API responses
+  - Maintains filter state while switching between tabs
+- **Optimized Filter Performance**:
+  - Uses [`useMemo`](src/components/bills/BillsTable.tsx) to cache filtered results
+  - Prevents unnecessary re-filtering when pagination changes
+  - Only re-applies filters when filter criteria actually change
+- **User-Friendly Experience**:
+  - Automatic page reset when applying new filters
+  - Clear visual feedback when filters are active
+  - Easy filter clearing with "All" option
+- **Filter + Favorites Integration**:
+  - Filters work seamlessly in both main bills and favorites tabs
+  - Maintains separate filtered counts for each view
+  - Preserves favorite status across filter changes
 
 ## Contributing
 
@@ -212,26 +183,6 @@ refactor: Code refactoring
 test: Add tests
 chore: Tooling changes
 ```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Port Already in Use**
-
-   ```sh
-   lsof -i :5173
-   kill -9 <PID>
-   ```
-
-2. **Node Version Mismatch**
-   ```sh
-   nvm use 22
-   ```
-
-## License
-
-[MIT License](LICENSE)
 
 ## Contact
 

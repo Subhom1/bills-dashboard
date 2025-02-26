@@ -12,8 +12,10 @@ interface TabContentProps {
   bills: Bill[];
   onLoadMore?: (skip: number) => Promise<void>;
   isLoading: boolean;
-  msg:string;
-  isFavoriteView:boolean;
+  msg: string;
+  isFavoriteView: boolean;
+  isFilterOn: boolean;
+  filteredBillLength: number;
 }
 
 /**
@@ -30,7 +32,9 @@ export const TabContent = React.memo(function TabContent({
   onLoadMore,
   isLoading,
   msg,
-  isFavoriteView
+  isFavoriteView,
+  isFilterOn,
+  filteredBillLength,
 }: TabContentProps) {
   // Show loading or empty state when no bills are present
   if (!bills.length) {
@@ -43,6 +47,13 @@ export const TabContent = React.memo(function TabContent({
 
   // Render bills table when data is available
   return (
-    <BillsTable bills={bills} onLoadMore={onLoadMore} isLoading={isLoading} isFavoriteView={isFavoriteView} />
+    <BillsTable
+      bills={bills}
+      onLoadMore={onLoadMore}
+      isLoading={isLoading}
+      isFavoriteView={isFavoriteView}
+      isFilterOn={isFilterOn}
+      filteredBillLength={filteredBillLength} 
+    />
   );
 });
