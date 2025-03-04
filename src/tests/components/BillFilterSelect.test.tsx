@@ -52,15 +52,13 @@ describe("BillFilterSelect", () => {
     // Select the "Enacted" option
     fireEvent.click(screen.getByText("Enacted"));
     // Verify that the selected status is "Enacted"
-    expect(screen.getByLabelText("Filter by Bill Status")).toHaveTextContent(
+    expect(screen.getByTestId("bill-status-filter")).toHaveTextContent(
       "Enacted"
     );
 
     // Change the active tab and re-render the component
     rerender(<BillFilterSelect {...defaultProps} activeTab={1} />);
     // Verify that the selected status is reset to "All"
-    expect(screen.getByLabelText("Filter by Bill Status")).toHaveTextContent(
-      "All"
-    );
+    expect(screen.getByTestId("bill-status-filter")).toHaveTextContent("Filter by Bill Status");
   });
 });
