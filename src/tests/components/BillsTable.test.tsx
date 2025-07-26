@@ -28,6 +28,8 @@ describe("BillsTable Component", () => {
       bills: mockBillsData,
       onLoadMore: mockOnLoadMore,
       isLoading: false,
+      isFavoriteView: false,
+      isFilterOn: "false",
     };
 
     let result;
