@@ -1,8 +1,7 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import BillsTabPanel from "@/components/bills/BillsTabPanel";
 import { RecoilRoot } from "recoil";
-import { mockBills } from "@/tests/mocks/mockBills";
-import { fetchBillsWithCache } from "@/api/bills";
+
 
 // Mock the fetchBills function
 jest.mock("@/api/bills", () => ({
@@ -13,19 +12,6 @@ describe("TabPanel Component", () => {
   beforeEach(async () => {
     // Clear all mocks before each test
     jest.clearAllMocks();
-
-    // Mock successful API response
-    (fetchBillsWithCache as jest.Mock).mockResolvedValue({
-      head: {
-        counts: { billCount: 1, resultCount: 1 },
-        dateRange: {
-          start: "1900-01-01T00:00:00.000Z",
-          end: "2099-01-01T00:00:00.000Z",
-        },
-        lang: "en",
-      },
-      results: mockBills[0].results,
-    });
 
     await act(async () => {
       render(
@@ -79,7 +65,7 @@ describe("TabPanel Component", () => {
   });
 
   //Test: Accessibility
- //Ensures proper ARIA attributes for screen readers.
+  //Ensures proper ARIA attributes for screen readers.
 
   test("maintains proper ARIA attributes for accessibility", async () => {
     const tabList = await screen.findByRole("tablist");
