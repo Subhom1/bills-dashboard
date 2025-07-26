@@ -11,7 +11,7 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { billsState } from "@/state/atoms/billsState";
 import { billHeadState } from "@/state/atoms/billHeadState";
-import { fetchBillsWithCache } from "@/api/bills";
+import { fetchBills } from "@/api/bills";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { TabContent } from "./TabContent";
 import { TabWrapper } from "./TabWrapper";
@@ -48,11 +48,9 @@ function a11yProps(index: number) {
 export default function BillsTabPanel() {
   const [value, setValue] = useState<number>(0);
   const [bills, setBills] = useRecoilState<Bill[]>(billsState);
-  const  setBillHead=
-    useSetRecoilState<BillsResponseHead>(billHeadState);
+  const setBillHead = useSetRecoilState<BillsResponseHead>(billHeadState);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const favoriteBills=
-    useRecoilValue<Bill[]>(favoriteBillsState);
+  const favoriteBills = useRecoilValue<Bill[]>(favoriteBillsState);
   const [activeFilter, setActiveFilter] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const paginatedFilteredBills = useRecoilValue<Bill[]>(filteredBillsSelector);
@@ -74,7 +72,7 @@ export default function BillsTabPanel() {
       if (initialFetchRef.current) return; // Skip if already fetched
       initialFetchRef.current = true;
       try {
-        const response = await fetchBillsWithCache(false, 25, 0);
+        const response = await fetchBills(false, 25, 0);
         setBillHead(response?.head);
         // Add isFavorite flag to each bill before saving to state
         const billsWithFavorites = response?.results.map(
@@ -123,11 +121,11 @@ export default function BillsTabPanel() {
         setIsLoading(true);
 
         // Get next batch of bills, using cache if available
-        const response = await fetchBillsWithCache(false, 25, newSkip);
+        const response = await fetchBills(false, 25, newSkip);
 
         // Transform API response to add favorite flag
-        const newBillsWithFavorites = response?.results.map(
-          (item: { bill: Bill }) => ({
+        const newBillsWithFavorites = response.results.map(
+          (item) => ({
             ...item.bill,
             isFavorite: false,
           })
@@ -232,7 +230,7 @@ export default function BillsTabPanel() {
               isLoading={isLoading}
               msg="No Bills Found"
               isFavoriteView={false}
-              isFilterOn={activeFilter !== "All" && !!activeFilter}
+              isFilterOn={activeFilter}
               filteredBillLength={paginatedFilteredBills.length}
             />
           </TabWrapper>
@@ -246,7 +244,7 @@ export default function BillsTabPanel() {
               isLoading={isLoading}
               msg="No Favourite Bills Found"
               isFavoriteView={true}
-              isFilterOn={activeFilter !== "All" && !!activeFilter}
+              isFilterOn={activeFilter}
               filteredBillLength={paginatedFilteredBills.length}
             />
           </TabWrapper>

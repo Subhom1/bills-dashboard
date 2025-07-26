@@ -28,7 +28,7 @@ describe("TabContent", () => {
     isLoading: false,
     msg: "No bills found",
     isFavoriteView: false,
-    isFilterOn: false,
+    isFilterOn: "",
     filteredBillLength: 0,
   };
 
@@ -60,7 +60,7 @@ describe("TabContent", () => {
         bills={bills}
         isLoading={true}
         isFavoriteView={true}
-        isFilterOn={true}
+        isFilterOn={""}
         filteredBillLength={10}
       />
     );
@@ -70,7 +70,7 @@ describe("TabContent", () => {
         onLoadMore: defaultProps.onLoadMore,
         isLoading: true,
         isFavoriteView: true,
-        isFilterOn: true,
+        isFilterOn: "",
         filteredBillLength: 10,
       }),
       {}

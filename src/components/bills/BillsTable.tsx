@@ -42,9 +42,9 @@ const ModalTabPanel = lazy(() =>
 interface BillsTableProps {
   bills: Bill[];
   onLoadMore?: (skip: number) => Promise<void>;
-  isLoading?: boolean;
-  isFavoriteView?: boolean;
-  isFilterOn?: boolean;
+  isLoading: boolean;
+  isFavoriteView: boolean;
+  isFilterOn: string;
   filteredBillLength?: number;
 }
 
@@ -65,7 +65,7 @@ export const BillsTable = ({
   onLoadMore = undefined,
   isLoading = false,
   isFavoriteView = false,
-  isFilterOn = false,
+  isFilterOn = "",
   filteredBillLength = 0,
 }: BillsTableProps): JSX.Element => {
   const [page, setPage] = useState<number>(0);
@@ -75,7 +75,7 @@ export const BillsTable = ({
   const [favoriteBills, setFavoriteBills] = useRecoilState(favoriteBillsState);
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-
+  const columnHeaders = [{name:"Bill Number", width:"100px"}, {name:"Bill Type", width:"100px"}, {name:"Status", width:"100px"}, {name:"Sponsor", width:"300px"}, {name:"Favorite", width:"100px"}];
   const paginationCount = useMemo(() => {
     if (isFavoriteView) {
       return bills.length;
@@ -88,10 +88,10 @@ export const BillsTable = ({
 
   const maxPage = useMemo(() => {
     return Math.max(0, Math.ceil(paginationCount / rowsPerPage) - 1);
-  }, [paginationCount, rowsPerPage]);
+  }, [paginationCount, rowsPerPage, isFilterOn]);
 
   useEffect(() => {
-    if (isFilterOn) {
+    if(isFilterOn !=="All"){
       setPage(0);
     }
   }, [isFilterOn]);
@@ -178,8 +178,17 @@ export const BillsTable = ({
         }
       }
     },
-    [onLoadMore, rowsPerPage, fetchedPages, isFavoriteView, isFilterOn, maxPage]
+    [
+      onLoadMore,
+      rowsPerPage,
+      fetchedPages,
+      isFavoriteView,
+      isFilterOn,
+      maxPage,
+      setFetchedPages,
+    ]
   );
+  
   return (
     <>
       <Paper
@@ -220,37 +229,15 @@ export const BillsTable = ({
             {/* Table header with fixed column names */}
             <TableHead>
               <TableRow role="row">
-                <TableCell
-                  sx={{ fontWeight: "bold", width: "100px" }}
-                  role="columnheader"
-                >
-                  Bill Number
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: "bold", width: "100px" }}
-                  role="columnheader"
-                >
-                  Bill Type
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: "bold", width: "100px" }}
-                  role="columnheader"
-                >
-                  Status
-                </TableCell>
-                <TableCell
-                  sx={{ fontWeight: "bold", width: "300px" }}
-                  role="columnheader"
-                >
-                  Sponsor
-                </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ fontWeight: "bold", width: "100px" }}
-                  role="columnheader"
-                >
-                  Favorite
-                </TableCell>
+                {columnHeaders.map((i, idx) => (
+                  <TableCell
+                    sx={{ fontWeight: "bold", width: i.width }}
+                    role="columnheader"
+                    key={idx}
+                  >
+                    {i.name}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody data-testid="bills-table-body">

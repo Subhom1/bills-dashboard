@@ -55,6 +55,7 @@ export const fetchBills = async (
 ): Promise<BillsResponse> => {
   if (isMock) return mockBills[0];
   try {
+    console.log(`Fetching bills with skip=${skip} and limit=${limit}`);
     const { data } = await axiosInstance.get<BillsResponse>(
       API_ENDPOINTS.LEGISLATION,
       {
@@ -82,18 +83,4 @@ export const favoriteService = {
       } favorites`
     );
   },
-};
-
-const cache = new Map();
-
-export const fetchBillsWithCache = async (isMock:boolean, limit: number, skip: number) => {
-  console.log(`Fetching bills with skip=${skip} and limit=${limit}`);
-  const cacheKey = `bills-${skip}`;
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey);
-  }
-
-  const response = await fetchBills(isMock, limit, skip);
-  cache.set(cacheKey, response);
-  return response;
 };

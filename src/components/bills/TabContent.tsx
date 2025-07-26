@@ -14,7 +14,7 @@ interface TabContentProps {
   isLoading: boolean;
   msg: string;
   isFavoriteView: boolean;
-  isFilterOn: boolean;
+  isFilterOn: string;
   filteredBillLength: number;
 }
 
