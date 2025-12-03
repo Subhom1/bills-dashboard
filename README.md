@@ -3,6 +3,10 @@
 A React application that allows users to view and manage bills from the Oireachtas API.
 Users can filter bills, view details in English and Irish, and mark bills as favorites.
 
+<img src="https://raw.githubusercontent.com/Subhom1/mygitsrc/refs/heads/master/src/bills-dashboard.jpg" alt="mobile-light-preview">
+
+
+
 ## Features
 
 - Fetches and displays bills in a paginated table
